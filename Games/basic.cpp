@@ -12,11 +12,6 @@
 #include <random>
 
 gl::DrawMaterial player_mat;
-gl::DrawMaterial grass_mat;
-gl::DrawMaterial wood_mat;
-gl::DrawMaterial water_mat;
-gl::DrawMaterial rock_mat;
-gl::DrawMaterial sky_mat;
 std::mt19937 gen(std::random_device{}());
 
 BasicGame::BasicGame() {
@@ -32,22 +27,19 @@ BasicGame::BasicGame() {
     world.addSystem(&camera_system);
 
     draw_system.setCamera(cam.get());
+    draw_system.makeLights();
     world.addSystem(&draw_system);
 
     character_system.setCamera(cam.get());
     character_system.setPlayerWidth(1.0f);
+    character_system.setFloorWidth(floor_size);
     world.addSystem(&character_system);
 
     world.addSystem(&collision_system);
     world.addSystem(&obj_system);
 
-    grass_mat.textures = gl::Material::loadTexture("resources/images/grass.png");
-    water_mat.textures = gl::Material::loadTexture("resources/images/water.png");
-    //wood_mat.textures = gl::Material::loadTexture("resources/images/wood.png");
-    rock_mat.textures = gl::Material::loadTexture("resources/images/rock.png");
-    sky_mat.textures = gl::Material::loadTexture("resources/images/sky.png");
-    //frog_mesh = gl::Mesh::loadStaticMesh("resources/Models/Frog/Ceramic-frog_low-poly.obj");
-    //skull_mesh = gl::Mesh::loadStaticMesh("resources/Models/Skull/12140_Skull_v3_L2.obj");
+    //map_mesh = gl::Mesh::loadStaticMesh("resources/Models/test.obj");
+    map_mesh = gl::Mesh::loadStaticMesh("resources/Models/Map/map.obj");
     createObjects();
 
     auto load_end = std::chrono::high_resolution_clock::now();
@@ -57,7 +49,7 @@ BasicGame::BasicGame() {
 
 void BasicGame::createObjects() {
     createPlayer();
-    createEnvironment();
+    createMap();
 }
 
 void BasicGame::createPlayer() {
@@ -85,72 +77,20 @@ void BasicGame::createPlayer() {
     collision_system.addGameObject(player_obj);
 }
 
-void BasicGame::createEnvironment() {
-    // Floor
-    floor_tile = gl::Mesh::getLoadedShape("quad");
-    character_system.setFloorWidth(floor_size);
-    for (int x = -floor_size; x < floor_size; x++) {
-        for (int z = -floor_size; z < floor_size_forward; z++) {
-            GameObject* floor_obj = world.addGameObject();
-            floor_obj->addDrawableComp();
-            floor_obj->getDrawableComp()->shape = floor_tile;
-            floor_obj->getDrawableComp()->mat = grass_mat;
+void BasicGame::createMap() {
+    map_obj = world.addGameObject();
+    map_obj->type = ObjectType::MAP;
 
-            floor_obj->addTransformComp();
-            floor_obj->getTransformComp()->pos = glm::vec3((float)x, 0.0f, (float)z);
+    map_obj->addDrawableComp();
+    map_obj->getDrawableComp()->mesh = map_mesh;
+    map_obj->getDrawableComp()->visible = true;
 
-            draw_system.addGameObject(floor_obj);
-        }
-        // Ending section
-        for (int k = floor_size_forward; k < floor_size_forward + floor_size; k++) {
-            GameObject* floor_obj = world.addGameObject();
-            floor_obj->addDrawableComp();
-            floor_obj->getDrawableComp()->shape = floor_tile;
-            floor_obj->getDrawableComp()->mat = water_mat;
+    map_obj->addTransformComp();
+    TransformComponent* trans = map_obj->getTransformComp();
+    trans->pos = glm::vec3(0.0f, -18.0f, 8.0f);
+    trans->scale = glm::vec3(0.01f);
 
-            floor_obj->addTransformComp();
-            floor_obj->getTransformComp()->pos = glm::vec3((float)x, 0.0f, (float)k);
-
-            draw_system.addGameObject(floor_obj);
-        }
-    }
-    // Walls
-    wall = gl::Mesh::getLoadedShape("cube");
-    for (int z = -floor_size; z < floor_size_forward + floor_size; z++) {
-        GameObject* wall_obj = world.addGameObject();
-        wall_obj->addDrawableComp();
-        wall_obj->getDrawableComp()->shape = wall;
-        wall_obj->getDrawableComp()->mat = rock_mat;
-        wall_obj->addTransformComp();
-        wall_obj->getTransformComp()->pos = glm::vec3(-floor_size - 1.0f, 0.0f, (float)z);
-        wall_obj->getTransformComp()->scale = glm::vec3(1.0f, 4.0f, 1.0f);
-        draw_system.addGameObject(wall_obj);
-
-        GameObject* wall_obj2 = world.addGameObject();
-        wall_obj2->addDrawableComp();
-        wall_obj2->getDrawableComp()->shape = wall;
-        wall_obj2->getDrawableComp()->mat = rock_mat;
-        wall_obj2->addTransformComp();
-        wall_obj2->getTransformComp()->pos = glm::vec3(floor_size, 0.0f, (float)z);
-        wall_obj2->getTransformComp()->scale = glm::vec3(1.0f, 4.0f, 1.0f);
-        draw_system.addGameObject(wall_obj2);
-    }
-
-    // Sky
-    sky_dome = gl::Mesh::getLoadedShape("sphere");
-    sky_obj = world.addGameObject();
-    sky_obj->type = ObjectType::SKY;
-    sky_obj->addDrawableComp();
-    sky_obj->getDrawableComp()->shape = sky_dome;
-    sky_obj->getDrawableComp()->mat = sky_mat;
-    sky_obj->addTransformComp();
-    TransformComponent* trans = sky_obj->getTransformComp();
-    trans->pos = cam->getPosition();
-    trans->scale = glm::vec3(200.0f);
-    trans->rotate = glm::rotate(trans->rotate,
-                                glm::radians(90.0f),
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-    draw_system.addGameObject(sky_obj);
+    draw_system.addGameObject(map_obj);
 }
 
 bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
@@ -198,9 +138,6 @@ void BasicGame::update(double delta_time) {
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
 
-    // Make sure sky is located where the player is
-    sky_obj->getTransformComp()->pos = cam->getPosition();
-
     character_system.updateWorld(world, dt);
     camera_system.updateWorld(world, dt);
     collision_system.updateWorld(world, dt);
@@ -212,7 +149,7 @@ void BasicGame::resetLevel() {
     clearObjects();
 
     glm::vec3 player_pos = glm::vec3(0.0f, 0.0f, 0.0f);
-    player_obj->getTransformComp()->pos = glm::vec3(player_pos.x, player_pos.y + 0.5f, player_pos.z);
+    player_obj->getTransformComp()->pos = glm::vec3(player_pos.x, player_pos.y, player_pos.z);
     character_system.setHorizSpeed(0.0f);
     character_system.reset();
     camera_system.reset();

@@ -6,10 +6,7 @@
 
 enum class ObjectType {
     PLAYER,
-    LOG,
-    COIN,
-    SKY,
-    ENEMY
+    MAP
 };
 
 class GameObject

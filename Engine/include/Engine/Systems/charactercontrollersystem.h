@@ -25,7 +25,7 @@ private:
 
     bool player_visible = false;
     bool on_ground = true;
-    float horiz_speed = 3.0f;
+    float horiz_speed = 8.0f;
     float vert_speed = 4.0f;
     float gravity = -9.8f;
     float velocity = 0.0f;

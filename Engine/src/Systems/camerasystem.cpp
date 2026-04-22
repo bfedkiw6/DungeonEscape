@@ -32,7 +32,7 @@ void CameraSystem::updateWorld(GameWorld& world, float /*dt*/) {
         return;
     }
 
-    m_player_height = 1.0f;
+    m_player_height = 0.5f;
     GameObject* player = m_objects[0];
     TransformComponent* transform = player->getTransformComp();
     if (!transform) {

@@ -52,33 +52,35 @@ void CharacterControllerSystem::updateWorld(GameWorld& world, float dt) {
 
     glm::vec3 curr_pos = transform->pos;
     float height = 0.25f;
-
     glm::vec3 pos = glm::vec3(0.0f);
 
     // Horizontal
-    // Only move when keys are pressed
+    glm::vec3 forward = m_cam->getLook();
+    forward.y = 0.0f;
+    if (glm::length(forward) > 0.0f) {
+        forward = glm::normalize(forward);
+    }
+    glm::vec3 right = m_cam->getRight();
+    right.y = 0.0f;
+    if (glm::length(right) > 0.0f) {
+        right = glm::normalize(right);
+    }
+
     if (key_state[GLFW_KEY_W]) {
-        pos += glm::vec3(0.0f, 0.0f, 1.0f);
+        pos += forward;
     }
     if (key_state[GLFW_KEY_S]) {
-        pos += glm::vec3(0.0f, 0.0f, -1.0f);
+        pos -= forward;
     }
     if (key_state[GLFW_KEY_A]) {
-        pos += glm::vec3(1.0f, 0.0f, 0.0f);
+        pos -= right;
     }
     if (key_state[GLFW_KEY_D]) {
-        pos += glm::vec3(-1.0f, 0.0f, 0.0f);
+        pos += right;
     }
 
     if (glm::length(pos) > 0.0f) {
         curr_pos += horiz_speed * dt * glm::normalize(pos);
-
-        // Make sure can't go off floor horizontally
-        if (curr_pos.x > floor_width - player_width) {
-            curr_pos.x = floor_width - player_width;
-        } else if (curr_pos.x < -floor_width) {
-            curr_pos.x = -floor_width;
-        }
     }
 
     // Vertical

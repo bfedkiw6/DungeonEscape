@@ -1,5 +1,6 @@
 #include <Engine/Systems/drawsystem.h>
 #include <Engine/gameobject.h>
+#include <algorithm>
 #include <iostream>
 
 void DrawSystem::setCamera(gl::Camera* cam) {
@@ -7,24 +8,26 @@ void DrawSystem::setCamera(gl::Camera* cam) {
 }
 
 void DrawSystem::updateWorld(GameWorld& world, float dt) {
+    glm::vec3 camPos = m_cam->getPosition();
+    std::cout << "cam light pos: "
+              << camPos.x << ", "
+              << camPos.y << ", "
+              << camPos.z << std::endl;
+
     auto start = std::chrono::high_resolution_clock::now();
     int culled, kept = 0;
 
     // Necessary drawing functions below
     gl::Graphics::clearScreen(glm::vec3(0.259f, 0.878f, 1.0f));
     gl::Graphics::usePhongShader();
-    gl::Graphics::setAmbientLight(glm::vec3(0.7f));
+    gl::Graphics::setAmbientLight(glm::vec3(0.5f));
     gl::Graphics::setCameraUniforms(m_cam);
+    gl::Graphics::setLights(lights);
 
     Frustum frustum = createFrustumFromCamera();
     std::vector<InstanceInput> instanced_objs;
 
     for (GameObject* obj : m_objects) {
-        if (obj->type == ObjectType::SKY) {
-            sky_obj = obj;
-            continue;
-        }
-
         TransformComponent* transform = obj->getTransformComp();
         DrawableComponent* draw = obj->getDrawableComp();
         if (transform != nullptr && draw != nullptr && draw->visible == true) {
@@ -35,12 +38,14 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
             obj_transform.setRotation(transform->rotate);
 
             // Frustum Culling
-            Sphere cull;
+            /*Sphere cull;
             cull.center = glm::vec3(0.0f);
             float max_scale = std::max(transform->scale.x, std::max(transform->scale.y, transform->scale.z));
             CollisionComponent* col = obj->getCollisionComp();
             if (col != nullptr) {
                 cull.radius = col->radius;
+            } else if (obj->type == ObjectType::MAP) {
+                cull.radius = 500.0f;
             } else {
                 cull.radius = 5.0f;
             }
@@ -49,7 +54,7 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
                 culled++;
                 continue;
             }
-            kept++;
+            kept++;*/
 
             if (draw->shape != nullptr) {
                 //gl::Graphics::drawObject(draw->shape, obj_transform, draw->mat); // Keep for speed test purposes
@@ -78,13 +83,12 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
 
     // Now draw all objects
     gl::Graphics::usePhongInstancedShader();
-    gl::Graphics::setAmbientLight(glm::vec3(0.7f));
+    gl::Graphics::setAmbientLight(glm::vec3(2.0f));
     gl::Graphics::setCameraUniforms(m_cam);
+    gl::Graphics::setLights(lights);
     for (auto& in : instanced_objs) {
         gl::Graphics::drawObjectInstanced(in.shape, in.models, in.material);
     }
-    drawSky(); // Draw at end to avoid drawing issues
-
 
     // Debugging
     auto end = std::chrono::high_resolution_clock::now();
@@ -92,6 +96,25 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
     /*std::cout << "DrawSystem time: " << time << " ms\n";
     std::cout << "Culled: " << culled << std::endl;
     std::cout << "Submitted: " << kept << std::endl;*/
+}
+
+void DrawSystem::makeLights() {
+    torch_positions.clear();
+    torch_positions.push_back(glm::vec3( -11.4f, 1.0f, 3.09f));
+    torch_positions.push_back(glm::vec3( 18.9f, 1.0f, 22.7f));
+    torch_positions.push_back(glm::vec3(47.4f, 1.0f, -20.1f));
+    torch_positions.push_back(glm::vec3(47.9f, 1.0f, 9.4f));
+    torch_positions.push_back(glm::vec3( 20.7f, 1.0f, -16.7f));
+    torch_positions.push_back(glm::vec3(-5.7f, 1.0f, -18.6f));
+    torch_positions.push_back(glm::vec3(14.2f, 2.0f, 12.8f));
+
+    for (const auto& pos : torch_positions) {
+        gl::PointLight torch(pos, glm::vec3(1.0f, 0.06f, 0.01f));
+        torch.color_ = glm::vec3(2.0f, 1.0f, 0.4f);
+        lights.push_back(torch);
+    }
+
+    gl::Graphics::setLights(lights);
 }
 
 Frustum DrawSystem::createFrustumFromCamera() {

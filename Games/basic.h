@@ -34,11 +34,8 @@ public:
 private:
     void createObjects();
     void createPlayer();
-    void createEnemy();
-    void createLog();
-    void createCoins();
-    void createEnvironment();
-    bool findObjectOverlap(GameObject* a, GameObject* b);
+    void createMap();
+    bool findObjectOverlap(GameObject* a, GameObject* b);    
 
     void resetLevel();
     void clearObjects();
@@ -55,31 +52,16 @@ private:
 
     std::unique_ptr<gl::Camera> cam;
 
-    gl::DrawMesh* skull_mesh;
-    GameObject* enemy_obj = nullptr;
-    NavMesh nav_mesh;
-    std::vector<int> enemy_path;
-    int enemy_path_index = 0;
-    float enemy_speed = 4.0f;
-
+    gl::DrawMesh* map_mesh;
+    GameObject* map_obj;
 
     GameObject* player_obj = nullptr;
-    gl::DrawMesh* frog_mesh;
     gl::DrawShape* player;
     float player_width;
 
     gl::DrawShape* floor_tile;
     int floor_size = 5;
     int floor_size_forward = 500;
-    gl::DrawShape* wall;
-    GameObject* sky_obj = nullptr;
-    gl::DrawShape* sky_dome;
-
-    gl::DrawShape* log;
-    std::vector<GameObject*> placed_logs;
-
-    gl::DrawShape* coin;
-    std::vector<GameObject*> placed_coins;
 
     glm::vec2 prev_mouse_pos = glm::vec2(0.0f);
 };

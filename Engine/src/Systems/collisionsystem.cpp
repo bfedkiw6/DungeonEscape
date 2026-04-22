@@ -56,10 +56,6 @@ void CollisionSystem::updateWorld(GameWorld& world, float dt) {
             if (result.collision) {
                 collided = true;
                 collided_obj = obj->type;
-                // If coin, hide it
-                if (obj->type == ObjectType::COIN) {
-                    obj->getDrawableComp()->visible = false;
-                }
             }
         }
     }

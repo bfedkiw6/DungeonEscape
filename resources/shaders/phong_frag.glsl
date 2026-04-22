@@ -71,7 +71,8 @@ void main() {
     }
 
     // Start with ambient lighting
-    vec3 result = materialAmbient * ambient_light;
+    //vec3 result = materialAmbient * ambient_light;
+    vec3 result = materialDiffuse * ambient_light;
 
     // Add contribution from each light
     for (int i = 0; i < num_lights; i++) {

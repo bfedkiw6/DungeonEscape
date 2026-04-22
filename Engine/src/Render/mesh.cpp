@@ -221,19 +221,19 @@ namespace gl {
                 const aiVector3D& texcoord = aimesh->HasTextureCoords(0) ?
                     aimesh->mTextureCoords[0][v] : aiVector3D(0.0f, 0.0f, 0.0f);
 
-                /*out_vertices.emplace_back(pos.x, pos.y, pos.z);
+                out_vertices.emplace_back(pos.x, pos.y, pos.z);
 
                 // Position
                 vertices.push_back(pos.x);
                 vertices.push_back(pos.y);
-                vertices.push_back(pos.z);*/
+                vertices.push_back(pos.z);
 
                 // TEMP:
-                glm::vec3 centered = glm::vec3(pos.x, pos.y, pos.z) - center;
+                /*glm::vec3 centered = glm::vec3(pos.x, pos.y, pos.z) - center;
                 out_vertices.emplace_back(centered.x, centered.y, centered.z);
                 vertices.push_back(centered.x);
                 vertices.push_back(centered.y);
-                vertices.push_back(centered.z);
+                vertices.push_back(centered.z);*/
 
                 // Normal
                 vertices.push_back(normal.x);

@@ -1,6 +1,7 @@
 #ifndef DRAWSYSTEM_H
 #define DRAWSYSTEM_H
 
+#include "Engine/Graphics/light.h"
 #include "system.h"
 #include "Engine/Graphics/camera.h"
 #include "Engine/Graphics/mesh.h"
@@ -40,6 +41,7 @@ struct Sphere : public Volume {
 class DrawSystem : public System {
 public:
     void updateWorld(GameWorld& world, float dt) override;
+    void makeLights();
     void setCamera(gl::Camera* cam);
     Frustum createFrustumFromCamera();
     void drawSky();
@@ -47,6 +49,8 @@ public:
 private:
     gl::Camera* m_cam = nullptr;
     GameObject* sky_obj;
+    std::vector<gl::Light> lights;
+    std::vector<glm::vec3> torch_positions;
 };
 
 #endif // DRAWSYSTEM_H

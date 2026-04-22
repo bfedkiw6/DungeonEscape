@@ -48,8 +48,5 @@ private:
     std::unique_ptr<gl::Camera> cam;
 
     Transform tb, tf;
-    gl::DrawMesh* frog_mesh;
     gl::DrawShape* background;
-    gl::DrawMaterial water_mat;
-    gl::DrawMaterial wood_mat;
 };

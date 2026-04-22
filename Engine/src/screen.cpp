@@ -8,10 +8,6 @@ Screen::Screen() {
     cam = std::make_unique<gl::Camera>();
     cam->setPosition(glm::vec3(0.0f, cam->getHeight(), 0.0f));
 
-    water_mat.textures = gl::Material::loadTexture("resources/images/water.png");
-    wood_mat.textures = gl::Material::loadTexture("resources/images/wood.png");
-    frog_mesh = gl::Mesh::loadStaticMesh("resources/Models/Frog/Ceramic-frog_low-poly.obj");
-
     background = gl::Mesh::getLoadedShape("cube");
     tb.setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
     tb.setScale(glm::vec3(40.0f, 40.0f, 1.0f));
@@ -109,9 +105,6 @@ void Screen::setType(ScreenType type) {
 }
 
 void Screen::drawMainMenu() {
-    // Background
-    drawGivenShape(background, tb, water_mat);
-
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 size = Window::getSize();
@@ -139,7 +132,6 @@ void Screen::drawMainMenu() {
     tf.setRotation(glm::rotate(glm::mat4(1.0f),
                               glm::radians(135.0f),
                               glm::vec3(0.0f, 1.0f, 0.0f)));
-    gl::Graphics::drawMesh(frog_mesh, tf);
 }
 
 void Screen::drawPauseScreen() {
@@ -163,9 +155,6 @@ void Screen::drawPauseScreen() {
 }
 
 void Screen::drawWinScreen() {
-    // Background
-    drawGivenShape(background, tb, water_mat);
-
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
@@ -181,9 +170,6 @@ void Screen::drawWinScreen() {
 }
 
 void Screen::drawLoseScreen() {
-    // Background
-    drawGivenShape(background, tb, wood_mat);
-
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
@@ -197,9 +183,9 @@ void Screen::drawLoseScreen() {
 
 void Screen::drawGameScreen() {
     gl::Graphics::useTextShader();
-    gl::Graphics::drawText("Coins Collected: " + std::to_string(coins_),
+    /*gl::Graphics::drawText("Coins Collected: " + std::to_string(coins_),
                            glm::vec2(20.0f, 40.0f), 32.0f,
-                           glm::vec3(0.0f, 0.0f, 0.0f), gl::TextAlign::LEFT);
+                           glm::vec3(0.0f, 0.0f, 0.0f), gl::TextAlign::LEFT);*/
 }
 
 void Screen::incrementCoins() {
