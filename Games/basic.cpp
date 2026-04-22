@@ -43,11 +43,11 @@ BasicGame::BasicGame() {
 
     grass_mat.textures = gl::Material::loadTexture("resources/images/grass.png");
     water_mat.textures = gl::Material::loadTexture("resources/images/water.png");
-    wood_mat.textures = gl::Material::loadTexture("resources/images/wood.png");
+    //wood_mat.textures = gl::Material::loadTexture("resources/images/wood.png");
     rock_mat.textures = gl::Material::loadTexture("resources/images/rock.png");
     sky_mat.textures = gl::Material::loadTexture("resources/images/sky.png");
-    frog_mesh = gl::Mesh::loadStaticMesh("resources/Models/Frog/Ceramic-frog_low-poly.obj");
-    skull_mesh = gl::Mesh::loadStaticMesh("resources/Models/Skull/12140_Skull_v3_L2.obj");
+    //frog_mesh = gl::Mesh::loadStaticMesh("resources/Models/Frog/Ceramic-frog_low-poly.obj");
+    //skull_mesh = gl::Mesh::loadStaticMesh("resources/Models/Skull/12140_Skull_v3_L2.obj");
     createObjects();
 
     auto load_end = std::chrono::high_resolution_clock::now();
