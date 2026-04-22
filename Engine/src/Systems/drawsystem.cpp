@@ -8,17 +8,11 @@ void DrawSystem::setCamera(gl::Camera* cam) {
 }
 
 void DrawSystem::updateWorld(GameWorld& world, float dt) {
-    glm::vec3 camPos = m_cam->getPosition();
-    std::cout << "cam light pos: "
-              << camPos.x << ", "
-              << camPos.y << ", "
-              << camPos.z << std::endl;
-
     auto start = std::chrono::high_resolution_clock::now();
     int culled, kept = 0;
 
     // Necessary drawing functions below
-    gl::Graphics::clearScreen(glm::vec3(0.259f, 0.878f, 1.0f));
+    gl::Graphics::clearScreen(glm::vec3(0.0f, 0.0f, 0.0f));
     gl::Graphics::usePhongShader();
     gl::Graphics::setAmbientLight(glm::vec3(0.5f));
     gl::Graphics::setCameraUniforms(m_cam);

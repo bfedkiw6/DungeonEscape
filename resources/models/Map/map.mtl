@@ -14,24 +14,6 @@ Tf 1.00 1.00 1.00
 Ni 1.00
 Ks 0.03 0.03 0.03
 Ns 71.96
-newmtl BladeSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-map_Kd sword_color_texture.png
-bump  -bm 1 sword_normal_texture.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 98.00
-newmtl Body_01SG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-map_Kd Body_Body_co_BaseColor.png
-bump  -bm 0.5 Body_Body_co_Normal.png
-Ni 1.00
 newmtl BroomSG
 illum 4
 Kd 0.25 0.12 0.02
@@ -72,54 +54,6 @@ Tf 1.00 1.00 1.00
 Ni 1.00
 Ks 0.06 0.02 0.00
 Ns 13.64
-newmtl CylinderFBXASC046001_CylinderFBXASC046002SG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 7.22
-newmtl CylinderFBXASC046003_CylinderFBXASC046004SG
-illum 4
-Kd 0.02 0.12 0.65
-Ka 0.00 0.00 0.00
-Tf 1.00 0.98 0.87
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 0.00
-newmtl CylinderFBXASC046004_CylinderFBXASC046005SG
-illum 4
-Kd 0.42 0.45 0.47
-Ka 0.00 0.00 0.00
-Tf 0.63 0.59 0.58
-Ni 1.00
-Ks 0.10 0.10 0.10
-Ns 0.00
-newmtl CylinderFBXASC046004_CylinderFBXASC046005SG1
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 7.22
-newmtl CylinderFBXASC046004_CylinderFBXASC046005SG2
-illum 4
-Kd 0.05 0.65 0.09
-Ka 0.00 0.00 0.00
-Tf 0.99 0.87 0.98
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 0.00
-newmtl CylinderFBXASC046018SG
-illum 4
-Kd 0.65 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 0.87 1.00 1.00
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 0.00
 newmtl DoorConnectSG
 illum 4
 Kd 0.08 0.07 0.06
@@ -144,12 +78,6 @@ Tf 0.70 0.70 0.70
 Ni 1.00
 Ks 0.50 0.50 0.50
 Ns 4.31
-newmtl MB_meshSG1
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-Ni 0.00
 newmtl PillarFBXASC046005SG
 illum 4
 Kd 0.26 0.27 0.16
@@ -174,14 +102,6 @@ Tf 1.00 1.00 1.00
 Ni 1.00
 Ks 0.03 0.03 0.03
 Ns 0.00
-newmtl Riing_01SG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.00 0.00 0.00
-Tf 1.00 1.00 1.00
-map_Kd Ring_Ring_co_BaseColor.png
-bump  -bm 0.5 Ring_Ring_co_Normal.png
-Ni 1.00
 newmtl TorchFBXASC046001SG
 illum 4
 Kd 0.13 0.07 0.02
@@ -206,33 +126,93 @@ Tf 1.00 1.00 1.00
 Ni 1.00
 Ks 0.02 0.02 0.01
 Ns 0.00
-newmtl initialShadingGroup
+newmtl lambert2SG
 illum 4
-Kd 0.00 0.00 0.00
+Kd 0.05 0.03 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl standardSurface2SG
+Ni 1.00
+newmtl lambert3SG
 illum 4
-Kd 0.00 0.00 0.00
+Kd 0.00 0.00 1.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl standardSurface3SG
+Ni 1.00
+newmtl lambert4SG
 illum 4
-Kd 0.00 0.00 0.00
+Kd 0.14 0.00 0.27
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl standardSurface4SG
+Ni 1.00
+newmtl lambert5SG
 illum 4
-Kd 0.00 0.00 0.00
+Kd 0.03 0.22 0.03
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
-newmtl standardSurface5SG
+Ni 1.00
+newmtl lambert6SG
 illum 4
-Kd 0.00 0.00 0.00
+Kd 0.12 0.12 0.12
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-Ni 0.00
+Ni 1.00
+newmtl lambert7SG
+illum 4
+Kd 0.00 0.00 0.13
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert8SG
+illum 4
+Kd 0.14 0.00 0.27
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert9SG
+illum 4
+Kd 0.00 0.07 0.03
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert10SG
+illum 4
+Kd 0.05 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert11SG
+illum 4
+Kd 0.08 0.04 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert12SG
+illum 4
+Kd 0.05 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert13SG
+illum 4
+Kd 0.00 0.00 0.14
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert14SG
+illum 4
+Kd 0.00 0.10 0.04
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert15SG
+illum 4
+Kd 0.17 0.09 0.06
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl lambert16SG
+illum 4
+Kd 0.50 0.49 0.21
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
