@@ -1,0 +1,169 @@
+#include <Engine/Systems/drawsystem.h>
+#include <Engine/gameobject.h>
+#include <iostream>
+
+void DrawSystem::setCamera(gl::Camera* cam) {
+    m_cam = cam;
+}
+
+void DrawSystem::updateWorld(GameWorld& world, float dt) {
+    auto start = std::chrono::high_resolution_clock::now();
+    int culled, kept = 0;
+
+    // Necessary drawing functions below
+    gl::Graphics::clearScreen(glm::vec3(0.259f, 0.878f, 1.0f));
+    gl::Graphics::usePhongShader();
+    gl::Graphics::setAmbientLight(glm::vec3(0.7f));
+    gl::Graphics::setCameraUniforms(m_cam);
+
+    Frustum frustum = createFrustumFromCamera();
+    std::vector<InstanceInput> instanced_objs;
+
+    for (GameObject* obj : m_objects) {
+        if (obj->type == ObjectType::SKY) {
+            sky_obj = obj;
+            continue;
+        }
+
+        TransformComponent* transform = obj->getTransformComp();
+        DrawableComponent* draw = obj->getDrawableComp();
+        if (transform != nullptr && draw != nullptr && draw->visible == true) {
+            // Set up the transform before drawing
+            Transform obj_transform;
+            obj_transform.setScale(transform->scale);
+            obj_transform.translate(transform->pos);
+            obj_transform.setRotation(transform->rotate);
+
+            // Frustum Culling
+            Sphere cull;
+            cull.center = glm::vec3(0.0f);
+            float max_scale = std::max(transform->scale.x, std::max(transform->scale.y, transform->scale.z));
+            CollisionComponent* col = obj->getCollisionComp();
+            if (col != nullptr) {
+                cull.radius = col->radius;
+            } else {
+                cull.radius = 5.0f;
+            }
+            // Don't draw object if not in view
+            if (!cull.isOnFrustum(frustum, transform->pos, cull.radius * max_scale)) {
+                culled++;
+                continue;
+            }
+            kept++;
+
+            if (draw->shape != nullptr) {
+                //gl::Graphics::drawObject(draw->shape, obj_transform, draw->mat); // Keep for speed test purposes
+                bool defined = false;
+                for (auto& in: instanced_objs) {
+                    // If object with same texture already exists, add to models list
+                    if (in.shape == draw->shape && in.material.textures.diffuse == draw->mat.textures.diffuse) {
+                        in.models.push_back(obj_transform.getModelMatrix());
+                        defined = true;
+                        break;
+                    }
+                }
+                 // Create new instance object since one doesn't already exist
+                if (!defined) {
+                    InstanceInput new_in;
+                    new_in.shape = draw->shape;
+                    new_in.material = draw->mat;
+                    new_in.models.push_back(obj_transform.getModelMatrix());
+                    instanced_objs.push_back(new_in);
+                }
+            } else if (draw->mesh != nullptr) {
+                gl::Graphics::drawMesh(draw->mesh, obj_transform);
+            }
+        }
+    }
+
+    // Now draw all objects
+    gl::Graphics::usePhongInstancedShader();
+    gl::Graphics::setAmbientLight(glm::vec3(0.7f));
+    gl::Graphics::setCameraUniforms(m_cam);
+    for (auto& in : instanced_objs) {
+        gl::Graphics::drawObjectInstanced(in.shape, in.models, in.material);
+    }
+    drawSky(); // Draw at end to avoid drawing issues
+
+
+    // Debugging
+    auto end = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    /*std::cout << "DrawSystem time: " << time << " ms\n";
+    std::cout << "Culled: " << culled << std::endl;
+    std::cout << "Submitted: " << kept << std::endl;*/
+}
+
+Frustum DrawSystem::createFrustumFromCamera() {
+    glm::vec3 position = m_cam->getPosition();
+    glm::vec3 up = m_cam->getUp();
+    glm::vec3 right = m_cam->getRight();
+    glm::vec3 look = m_cam->getLook();
+    float aspect = m_cam->getAspectRatio();
+    float fov = m_cam->getFOV();
+    float near = m_cam->getNear();
+    float far = m_cam->getFar();
+
+    Frustum frustum;
+    const float half_vside = far * tanf(fov * 0.5f);
+    const float half_hside = half_vside * aspect;
+    const glm::vec3 front_mult_far = far * look;
+
+    frustum.near_face.normal = glm::normalize(look);
+    frustum.near_face.distance = glm::dot(frustum.near_face.normal, position + near * look);
+
+    frustum.far_face.normal = glm::normalize(-look);
+    frustum.far_face.distance = glm::dot(frustum.far_face.normal, position + front_mult_far);
+
+    frustum.right_face.normal = glm::normalize(glm::cross(front_mult_far - right * half_hside, up));
+    frustum.right_face.distance = glm::dot(frustum.right_face.normal, position);
+
+    frustum.left_face.normal = glm::normalize(glm::cross(up, front_mult_far + right * half_hside));
+    frustum.left_face.distance = glm::dot(frustum.left_face.normal, position);
+
+    frustum.top_face.normal = glm::normalize(glm::cross(right, front_mult_far - up * half_vside));
+    frustum.top_face.distance = glm::dot(frustum.top_face.normal, position);
+
+    frustum.bottom_face.normal = glm::normalize(glm::cross(front_mult_far + up * half_vside, right));
+    frustum.bottom_face.distance = glm::dot(frustum.bottom_face.normal, position);
+
+    return frustum;
+}
+
+bool Sphere::isOnOrForwardPlane(const Plane& plane, const glm::vec3& center, float radius) const {
+    return glm::dot(plane.normal, center) - plane.distance >= -radius;
+}
+
+bool Sphere::isOnFrustum(const Frustum& frustum, const glm::vec3& center, float radius) const {
+    return isOnOrForwardPlane(frustum.left_face, center, radius) &&
+           isOnOrForwardPlane(frustum.right_face, center, radius) &&
+           isOnOrForwardPlane(frustum.far_face, center, radius) &&
+           isOnOrForwardPlane(frustum.near_face, center, radius) &&
+           isOnOrForwardPlane(frustum.top_face, center, radius) &&
+           isOnOrForwardPlane(frustum.bottom_face, center, radius);
+};
+
+void DrawSystem::drawSky() {
+    GameObject* obj = sky_obj;
+    TransformComponent* transform = obj->getTransformComp();
+    DrawableComponent* draw = obj->getDrawableComp();
+    if (transform && draw && draw->visible) {
+        gl::Graphics::usePhongShader();
+        gl::Graphics::setAmbientLight(glm::vec3(2.0f));
+        gl::Graphics::setCameraUniforms(m_cam);
+
+        Transform obj_transform;
+        obj_transform.setScale(transform->scale);
+        obj_transform.translate(transform->pos);
+        obj_transform.setRotation(transform->rotate);
+
+        // Need below since objects are inside sphere
+        glDepthMask(GL_FALSE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        gl::Graphics::drawObject(draw->shape, obj_transform, draw->mat);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glDepthMask(GL_TRUE);
+    }
+}

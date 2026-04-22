@@ -1,0 +1,15 @@
+# Build folders
+build/
+build-*/
+cmake-build-*/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+
+# Qt
+*.user
+
+# Mac
+.DS_Store
+

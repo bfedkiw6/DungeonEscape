@@ -1,0 +1,14 @@
+# Blender MTL File: 'Ceramic-frog_low-poly.blend'
+# Material Count: 1
+
+newmtl Ceramic-frog_low-poly
+Ns 0.000000
+Ka 0.2 0.8 0.2
+Kd 0.2 0.8 0.2
+Ks 0.0 0.0 0.0
+Ke 0.0 0.0 0.0
+Ni 1.0
+d 1.0
+illum 1
+map_Kd Ceramic-frog_low-poly_TEXTURES/albedo_Ceramic-frog_low-poly.png
+map_Bump Ceramic-frog_low-poly_TEXTURES/normal_Ceramic-frog_low-poly.png
