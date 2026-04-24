@@ -33,7 +33,8 @@ struct DrawableComponent : Component {
 
 enum class CollisionShape {
     CYLINDER,
-    SPHERE
+    SPHERE,
+    BOX
 };
 
 struct CollisionComponent : Component {

@@ -10,10 +10,12 @@ class CollisionSystem : public System {
 public:
     void updateWorld(GameWorld& world, float dt) override;
     std::pair<bool, ObjectType> getCollided();
+    void setOldPosition(glm::vec3 old_pos);
 
 private:
     bool collided = false;
     ObjectType collided_obj;
+    glm::vec3 player_pos;
 
     // Uniform grid collision accelerations vars/funcs
     float cell_size = 5.0f;

@@ -50,6 +50,7 @@ BasicGame::BasicGame() {
 void BasicGame::createObjects() {
     createPlayer();
     createMap();
+    createWalls();
 }
 
 void BasicGame::createPlayer() {
@@ -93,7 +94,67 @@ void BasicGame::createMap() {
     draw_system.addGameObject(map_obj);
 }
 
-bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
+void BasicGame::createWalls() {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> scales;
+    int num_walls = 10;
+    getWallTransforms(positions, scales);
+    //gl::DrawShape* wall_shape = gl::Mesh::getLoadedShape("cube");
+
+    for (int i = 0; i < num_walls; i++) {
+        GameObject* wall = world.addGameObject();
+        wall->type = ObjectType::WALLS;
+
+        /*wall->addDrawableComp();
+        wall->getDrawableComp()->shape = wall_shape;
+        draw_system.addGameObject(wall);*/
+
+        wall->addTransformComp();
+        wall->getTransformComp()->pos = positions[i];
+        wall->getTransformComp()->scale = scales[i];
+
+        wall->addCollisionComp();
+        wall->getCollisionComp()->shape = CollisionShape::BOX;
+        wall->getCollisionComp()->radius = scales[i].z;
+        wall->getCollisionComp()->height = scales[i].y;
+
+        collision_system.addGameObject(wall);
+    }
+}
+
+void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
+    positions.push_back(glm::vec3(-18.9354, 0.75, 20.0));
+    scales.push_back(glm::vec3(2.5, 6.0, 32.0));
+
+    positions.push_back(glm::vec3(7.0, 0.75, 33.854));
+    scales.push_back(glm::vec3(50.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(-5.0, 0.75, -4.74815));
+    scales.push_back(glm::vec3(30.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(22.0, 0.75, -4.85759));
+    scales.push_back(glm::vec3(17.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(31.3189, 0.75, 19.0));
+    scales.push_back(glm::vec3(2.5, 6.0, 30.0));
+
+    positions.push_back(glm::vec3(31.0641, 0.75, -16.4502));
+    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
+
+    positions.push_back(glm::vec3(-18.9354, 0.75, -16.0396));
+    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
+
+    positions.push_back(glm::vec3(25.0, 0.75, -31.0));
+    scales.push_back(glm::vec3(90.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(64.7459, 0.75, -7.62769));
+    scales.push_back(glm::vec3(2.5, 6.0, 50.0));
+
+    positions.push_back(glm::vec3(47.0, 0.75, 17.1381));
+    scales.push_back(glm::vec3(34.0, 6.0, 2.5));
+}
+
+/*bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
     TransformComponent* trans_a = a->getTransformComp();
     CollisionComponent* col_a = a->getCollisionComp();
     TransformComponent* trans_b = b->getTransformComp();
@@ -117,7 +178,7 @@ bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
         result = colA.getMTV(&colB);
     }
     return result.collision;
-}
+}*/
 
 void BasicGame::draw() {
     if (screen.getType() != ScreenType::GAME) {
@@ -137,6 +198,7 @@ void BasicGame::update(double delta_time) {
     }
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
+    collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
 
     character_system.updateWorld(world, dt);
     camera_system.updateWorld(world, dt);

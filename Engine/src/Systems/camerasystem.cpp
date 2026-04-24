@@ -1,5 +1,7 @@
 #include <Engine/Systems/camerasystem.h>
 #include <Engine/gameobject.h>
+#include <iostream>
+#include <ostream>
 
 void CameraSystem::setCamera(gl::Camera* cam) {
     m_cam = cam;
@@ -28,6 +30,12 @@ void CameraSystem::reset() {
 }
 
 void CameraSystem::updateWorld(GameWorld& world, float /*dt*/) {
+    glm::vec3 camPos = m_cam->getPosition();
+    std::cout << "cam pos: "
+              << camPos.x << ", "
+              << camPos.y << ", "
+              << camPos.z << std::endl;
+
     if (!m_cam || m_objects.empty()) {
         return;
     }

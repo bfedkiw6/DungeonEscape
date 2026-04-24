@@ -4,6 +4,7 @@
 #include <Engine/Collider.h>
 #include <Engine/collision/CylinderCollider.h>
 #include <Engine/collision/SphereCollider.h>
+#include <Engine/collision/BoxCollider.h>
 #include <Engine/GJK.h>
 #include <iostream>
 #include <set>
@@ -50,6 +51,19 @@ void CollisionSystem::updateWorld(GameWorld& world, float dt) {
                 // Nudge
                 p_transform->pos += result.normal * result.depth;
             }
+        }else if (obj_collision->shape == CollisionShape::BOX) {
+            BoxCollider obj_col(obj_transform, obj_collision->height);
+            MTV result = obj_col.getMTV(&p_col).invert();
+            if (result.collision) {
+                collided = true;
+                collided_obj = obj->type;
+                if (obj->type == ObjectType::WALLS) {
+                    p_transform->pos = player_pos;
+                } else {
+                    // Nudge
+                    p_transform->pos += result.normal * result.depth;
+                }
+            }
         } else if (obj_collision->shape == CollisionShape::SPHERE) {
             SphereCollider obj_col(obj_transform, obj_collision->radius);
             MTV result = obj_col.getMTV(&p_col).invert();
@@ -83,14 +97,40 @@ void CollisionSystem::buildUniformGrid() {
         TransformComponent* transform = obj->getTransformComp();
         CollisionComponent* collision = obj->getCollisionComp();
         DrawableComponent* draw = obj->getDrawableComp();
+
         if (!transform || !collision) {
             continue;
         }
         if (draw && !draw->visible) {
             continue;
         }
-        // Enter object position into map (multiple objects in one cell is posssible)
-        grid[getCell(transform->pos)].push_back(obj);
+
+        glm::vec3 pos = transform->pos;
+        float minX, maxX, minZ, maxZ;
+        if (collision->shape == CollisionShape::BOX) {
+            glm::vec3 half = transform->scale * 0.5f;
+            minX = pos.x - half.x;
+            maxX = pos.x + half.x;
+            minZ = pos.z - half.z;
+            maxZ = pos.z + half.z;
+        } else {
+            float r = collision->radius;
+            minX = pos.x - r;
+            maxX = pos.x + r;
+            minZ = pos.z - r;
+            maxZ = pos.z + r;
+        }
+
+        // Loop through all grid cells an object shows up in
+        int minCellX = int(std::floor(minX / cell_size));
+        int maxCellX = int(std::floor(maxX / cell_size));
+        int minCellZ = int(std::floor(minZ / cell_size));
+        int maxCellZ = int(std::floor(maxZ / cell_size));
+        for (int x = minCellX; x <= maxCellX; x++) {
+            for (int z = minCellZ; z <= maxCellZ; z++) {
+                grid[{x, z}].push_back(obj);
+            }
+        }
     }
 }
 
@@ -125,3 +165,6 @@ std::vector<GameObject*> CollisionSystem::findCloseObjs(GameObject* player) {
     return close;
 }
 
+void CollisionSystem::setOldPosition(glm::vec3 old_pos) {
+    player_pos = old_pos;
+}

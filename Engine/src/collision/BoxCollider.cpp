@@ -2,7 +2,8 @@
 
 #include "Engine/GJK.h"
 
-BoxCollider::BoxCollider(TransformComponent* transform): Collider(ColliderType::BOX, transform) {
+BoxCollider::BoxCollider(TransformComponent* transform, float height)
+    : Collider(ColliderType::BOX, transform), height(height) {
 
 }
 

@@ -35,7 +35,9 @@ private:
     void createObjects();
     void createPlayer();
     void createMap();
-    bool findObjectOverlap(GameObject* a, GameObject* b);    
+    void createWalls();
+    bool findObjectOverlap(GameObject* a, GameObject* b);
+    void getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales);
 
     void resetLevel();
     void clearObjects();

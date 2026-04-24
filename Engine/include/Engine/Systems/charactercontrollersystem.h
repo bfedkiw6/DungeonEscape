@@ -18,6 +18,7 @@ public:
     void setFloorWidth(int width);
     void setPlayerWidth(float width);
     void reset();
+    glm::vec3 getOldPosition();
 
 private:
     gl::Camera* m_cam = nullptr;
@@ -31,6 +32,7 @@ private:
     float velocity = 0.0f;
     float floor_width = 0.0f;
     float player_width = 0.0f;
+    glm::vec3 old_pos;
 };
 
 #endif // CHARACTERCONTROLLERSYSTEM_H

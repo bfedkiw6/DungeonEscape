@@ -39,6 +39,10 @@ void CharacterControllerSystem::reset() {
     velocity = 0;
 }
 
+glm::vec3 CharacterControllerSystem::getOldPosition() {
+    return old_pos;
+}
+
 void CharacterControllerSystem::updateWorld(GameWorld& world, float dt) {
     if (!m_cam || m_objects.empty()) {
         return;
@@ -106,5 +110,6 @@ void CharacterControllerSystem::updateWorld(GameWorld& world, float dt) {
         on_ground = true;
     }
 
+    old_pos = transform->pos;
     transform->pos = curr_pos;
 }
