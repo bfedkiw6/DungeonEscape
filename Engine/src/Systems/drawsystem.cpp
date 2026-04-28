@@ -1,5 +1,6 @@
 #include <Engine/Systems/drawsystem.h>
 #include <Engine/gameobject.h>
+#include <Engine/Systems/particlesystem.h>
 #include <algorithm>
 #include <iostream>
 
@@ -74,6 +75,7 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
             }
         }
     }
+    drawParticles();
 
     // Now draw all objects
     gl::Graphics::usePhongInstancedShader();
@@ -182,5 +184,35 @@ void DrawSystem::drawSky() {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glDepthMask(GL_TRUE);
+    }
+}
+
+void DrawSystem::setParticleSystem(ParticleSystem* ps) {
+    particle_system = ps;
+}
+
+void DrawSystem::drawParticles() {
+    if (!particle_system) {
+        return;
+    }
+
+    gl::DrawShape* sphere = gl::Mesh::getLoadedShape("sphere");
+    if (!sphere) {
+        return;
+    }
+
+    for (const auto& p : particle_system->getParticles()) {
+        Transform t;
+        t.setScale(glm::vec3(p.size));
+        t.translate(p.pos);
+
+        gl::DrawMaterial mat;
+        mat.ambient = glm::vec3(p.color.r, p.color.g, p.color.b);
+        mat.diffuse = glm::vec3(p.color.r, p.color.g, p.color.b);
+        mat.specular = glm::vec3(0.0f);
+        mat.shininess = 1.0f;
+        mat.opacity = p.color.a;
+
+        gl::Graphics::drawObject(sphere, t, mat);
     }
 }

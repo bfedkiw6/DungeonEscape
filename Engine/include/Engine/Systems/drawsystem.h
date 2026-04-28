@@ -1,11 +1,11 @@
 #ifndef DRAWSYSTEM_H
 #define DRAWSYSTEM_H
 
-#include "Engine/Graphics/light.h"
 #include "system.h"
 #include "Engine/Graphics/camera.h"
 #include "Engine/Graphics/mesh.h"
-#include "Engine/Systems/camerasystem.h"
+#include "Engine/Systems/particlesystem.h"
+#include "Engine/Graphics/light.h"
 
 class GameWorld;
 
@@ -45,12 +45,15 @@ public:
     void setCamera(gl::Camera* cam);
     Frustum createFrustumFromCamera();
     void drawSky();
+    void setParticleSystem(ParticleSystem* ps);
+    void drawParticles();
 
 private:
     gl::Camera* m_cam = nullptr;
     GameObject* sky_obj;
     std::vector<gl::Light> lights;
     std::vector<glm::vec3> torch_positions;
+    ParticleSystem* particle_system = nullptr;
 };
 
 #endif // DRAWSYSTEM_H

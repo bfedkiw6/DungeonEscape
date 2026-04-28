@@ -15,6 +15,7 @@
 #include <Engine/Systems/collisionsystem.h>
 #include <Engine/Systems/objectcontrollersystem.h>
 #include <Engine/Systems/aisystem.h>
+#include <Engine/Systems/particlesystem.h>
 
 class BasicGame: public Game {
 
@@ -35,9 +36,19 @@ private:
     void createObjects();
     void createPlayer();
     void createMap();
+
     void createWalls();
-    bool findObjectOverlap(GameObject* a, GameObject* b);
     void getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales);
+
+    struct MagicVal {
+        glm::vec3 pos;
+        bool float_down;
+    };
+    std::vector<MagicVal> magic_spots;
+    float particle_timer = 4.0f;
+    void createMagicSpots();
+
+    bool findObjectOverlap(GameObject* a, GameObject* b);
 
     void resetLevel();
     void clearObjects();
@@ -48,6 +59,7 @@ private:
     CharacterControllerSystem character_system;
     CollisionSystem collision_system;
     ObjectControllerSystem obj_system;
+    ParticleSystem particle_system;
 
     Screen screen;
     ScreenType screen_type;

@@ -28,6 +28,7 @@ BasicGame::BasicGame() {
 
     draw_system.setCamera(cam.get());
     draw_system.makeLights();
+    draw_system.setParticleSystem(&particle_system);
     world.addSystem(&draw_system);
 
     character_system.setCamera(cam.get());
@@ -37,6 +38,7 @@ BasicGame::BasicGame() {
 
     world.addSystem(&collision_system);
     world.addSystem(&obj_system);
+    world.addSystem(&particle_system);
 
     //map_mesh = gl::Mesh::loadStaticMesh("resources/Models/test.obj");
     map_mesh = gl::Mesh::loadStaticMesh("resources/Models/Map/map.obj");
@@ -51,6 +53,7 @@ void BasicGame::createObjects() {
     createPlayer();
     createMap();
     createWalls();
+    createMagicSpots();
 }
 
 void BasicGame::createPlayer() {
@@ -154,6 +157,25 @@ void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector
     scales.push_back(glm::vec3(34.0, 6.0, 2.5));
 }
 
+void BasicGame::createMagicSpots() {
+    // By the exit door
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, 2.4627), true});
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, 6.1434), true});
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, -1.30808), true});
+
+    // By lantern
+    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -14.02), false});
+    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -19.85), false});
+    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -16.61), false});
+
+    // By brooms
+    magic_spots.push_back(MagicVal{glm::vec3(59.2251, 6.0, -29.0077), true});
+    magic_spots.push_back(MagicVal{glm::vec3(61.2519, -5.0, -27.5818), false});
+    magic_spots.push_back(MagicVal{glm::vec3(62.8983, 6.0, -25.4046), true});
+
+    // TODO: possibly add near places where the puzzles should go as a clue
+}
+
 /*bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
     TransformComponent* trans_a = a->getTransformComp();
     CollisionComponent* col_a = a->getCollisionComp();
@@ -200,10 +222,20 @@ void BasicGame::update(double delta_time) {
     player_obj->getDrawableComp()->visible = false;
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
 
+    // Particles spawn over time
+    particle_timer += dt;
+    if (particle_timer > 4.0f) {
+        for (MagicVal v : magic_spots) {
+            particle_system.addMagicBurst(v.pos, v.float_down);
+        }
+        particle_timer = 0.0f;
+    }
+
     character_system.updateWorld(world, dt);
     camera_system.updateWorld(world, dt);
     collision_system.updateWorld(world, dt);
     obj_system.updateWorld(world, dt);
+    particle_system.updateWorld(world, dt);
 }
 
 void BasicGame::resetLevel() {
