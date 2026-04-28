@@ -49,4 +49,6 @@ private:
 
     Transform tb, tf;
     gl::DrawShape* background;
+    gl::DrawMesh* skull_mesh;
+    gl::DrawMaterial background_mat;
 };

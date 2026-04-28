@@ -12,6 +12,9 @@ Screen::Screen() {
     tb.setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
     tb.setScale(glm::vec3(40.0f, 40.0f, 1.0f));
     tb.setRotation(glm::mat4(1.0f));
+    background_mat.textures = gl::Material::loadTexture("resources/images/magic.png");
+
+    //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
 }
 
 void Screen::draw() {
@@ -105,36 +108,32 @@ void Screen::setType(ScreenType type) {
 }
 
 void Screen::drawMainMenu() {
+    drawGivenShape(background, tb, background_mat);
+
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 size = Window::getSize();
     glm::vec2 center = size/2.f;
-    gl::Graphics::drawText("Welcome to Frog Hop!",
+    gl::Graphics::drawText("Welcome to Magic Escape!",
                            glm::vec2(center.x, center.y - 200.0f), 48.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Collect coins and avoid hitting the logs",
+    gl::Graphics::drawText("Solve puzzles to escape from the wizard's dungeon",
                            glm::vec2(center.x, center.y - 140.0f), 48.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Press ENTER to play",
+    gl::Graphics::drawText("Happy Solving!",
                            glm::vec2(center.x, center.y - 80.0f), 48.0f,
-                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Press W to start momentum",
-                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
+                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Press ENTER to play",
+                           glm::vec2(center.x, center.y + 140.0f), 48.0f,
                            glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press ESC to pause & see controls",
-                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 200.0f), 48.0f,
                            glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
-
-    // Frog
-    gl::Graphics::usePhongShader();
-    tf.setPosition(glm::vec3(0.0f, 0.1f, 2.0f));
-    tf.setScale(glm::vec3(5.0f));
-    tf.setRotation(glm::rotate(glm::mat4(1.0f),
-                              glm::radians(135.0f),
-                              glm::vec3(0.0f, 1.0f, 0.0f)));
 }
 
 void Screen::drawPauseScreen() {
+    drawGivenShape(background, tb, background_mat);
+
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
     gl::Graphics::drawText("Paused",
@@ -146,10 +145,10 @@ void Screen::drawPauseScreen() {
     gl::Graphics::drawText("MOUSE = Look Around",
                            glm::vec2(center.x, center.y + 40.0f), 48.0f,
                           glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("A and D = Move Side to Side",
+    gl::Graphics::drawText("WASD = Move Around",
                            glm::vec2(center.x, center.y + 100.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("SPACE = jump",
+    gl::Graphics::drawText("SPACE = Jump",
                            glm::vec2(center.x, center.y + 160.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
 }
@@ -199,7 +198,7 @@ void Screen::resetCoins() {
 
 void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat) {
     gl::Graphics::usePhongShader();
-    gl::Graphics::setAmbientLight(glm::vec3(1.0f));
+    gl::Graphics::setAmbientLight(glm::vec3(0.5f));
     gl::Graphics::setCameraUniforms(cam.get());
     gl::Graphics::drawObject(shape, t, mat);
 }

@@ -6,6 +6,7 @@
 ParticleSystem::ParticleSystem() {}
 
 void ParticleSystem::updateWorld(GameWorld& world, float dt) {
+    // Particles should move over time
     moveParticles();
 }
 
@@ -24,8 +25,8 @@ int ParticleSystem::numParticles() const {
 void ParticleSystem::moveParticles() {
     for (auto& p : particles) {
         p.pos += p.vel;
+        p.vel *= 0.985f; // Slow down particles over time (more natural)
         p.lifetime--;
-        p.vel *= 0.985f;
 
         if (p.type == ParticleType::STREAMER) {
             p.vel.y -= 0.0003f;
@@ -33,9 +34,8 @@ void ParticleSystem::moveParticles() {
             p.vel.y += 0.0003f;
         }
     }
-
-    particles.erase(
-        std::remove_if(particles.begin(), particles.end(),
+    // Lifetime = 0, delete particle
+    particles.erase(std::remove_if(particles.begin(), particles.end(),
                         [](const Particle& p) { return p.lifetime <= 0; }), particles.end());
 }
 
@@ -61,16 +61,16 @@ void ParticleSystem::addMagicBurst(glm::vec3 center, bool float_down) {
         }
 
         int c = color(gen);
-        Color burstColor;
+        Color color;
         if (c == 0) {
-            burstColor = {0.6f, 0.2f, 1.0f, 1.0f}; // purple
+            color = {0.6f, 0.2f, 1.0f, 1.0f}; // purple
         } else if (c == 1) {
-            burstColor = {0.2f, 0.6f, 1.0f, 1.0f}; // blue
+            color = {0.2f, 0.6f, 1.0f, 1.0f}; // blue
         } else {
-            burstColor = {1.0f, 0.4f, 0.9f, 1.0f}; // pink
+            color = {1.0f, 0.4f, 0.9f, 1.0f}; // pink
         }
 
-        p.color = burstColor;
+        p.color = color;
         p.size = 0.08f;
         p.lifetime = 600;
         add(p);
