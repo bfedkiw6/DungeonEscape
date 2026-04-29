@@ -183,6 +183,14 @@ namespace gl {
 
     void Graphics::drawSkinnedMesh(SkinnedMesh* skinned_mesh, const Transform& transform) {
         // TODO implement correct drawing with bone transformations in Animation lab
+        const auto model_matrix = transform.getModelMatrix();
+        active_shader_->setMat4("model", model_matrix);
+        active_shader_->setMat3("normal", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
+
+        skinned_mesh->skeleton.updateBoneMatrices();
+        const std::vector<glm::mat4>& bones = skinned_mesh->skeleton.getBoneMatrices();
+        active_shader_->setMat4Vec("bones", skinned_mesh->skeleton.getNumBones(), bones);
+
         drawMesh(&skinned_mesh->draw_mesh, transform);
     }
 

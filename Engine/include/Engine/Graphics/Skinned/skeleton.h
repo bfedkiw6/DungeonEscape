@@ -42,6 +42,8 @@ namespace gl {
         void addBone(const std::string& bone_name, const unsigned int current_id, const int parent_id,
             const glm::mat4& offset_matrix, const glm::mat4& local_transform, bool is_virtual = false);
         void updateBoneMatrices();
+        const std::vector<glm::mat4>& getBoneMatrices();
+        unsigned int getNumBones();
 
 
         void setCurrentAnimation(size_t index);

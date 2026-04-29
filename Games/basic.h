@@ -16,6 +16,7 @@
 #include <Engine/Systems/objectcontrollersystem.h>
 #include <Engine/Systems/aisystem.h>
 #include <Engine/Systems/particlesystem.h>
+#include <Engine/Systems/animationsystem.h>
 
 class BasicGame: public Game {
 
@@ -33,8 +34,10 @@ public:
     virtual void resizeWindowEvent(int new_width, int new_height) override;
 
 private:
+    // Object creation
     void createObjects();
     void createPlayer();
+    void createGuard();
     void createMap();
 
     void createWalls();
@@ -48,11 +51,10 @@ private:
     float particle_timer = 4.0f;
     void createMagicSpots();
 
-    bool findObjectOverlap(GameObject* a, GameObject* b);
-
     void resetLevel();
     void clearObjects();
 
+    // World & Systems
     GameWorld world;
     DrawSystem draw_system;
     CameraSystem camera_system;
@@ -60,12 +62,9 @@ private:
     CollisionSystem collision_system;
     ObjectControllerSystem obj_system;
     ParticleSystem particle_system;
+    AnimationSystem animation_system;
 
-    Screen screen;
-    ScreenType screen_type;
-
-    std::unique_ptr<gl::Camera> cam;
-
+    // Objects & Meshes
     gl::DrawMesh* map_mesh;
     GameObject* map_obj;
 
@@ -73,9 +72,18 @@ private:
     gl::DrawShape* player;
     float player_width;
 
+    GameObject* guard_obj = nullptr;
+
+    // Floor
     gl::DrawShape* floor_tile;
     int floor_size = 5;
     int floor_size_forward = 500;
+
+    // Rand
+    Screen screen;
+    ScreenType screen_type;
+
+    std::unique_ptr<gl::Camera> cam;
 
     glm::vec2 prev_mouse_pos = glm::vec2(0.0f);
 };

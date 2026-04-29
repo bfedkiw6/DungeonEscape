@@ -47,6 +47,14 @@ namespace gl {
         }
     }
 
+    const std::vector<glm::mat4>& Skeleton::getBoneMatrices() {
+        return bone_matrices_;
+    }
+
+    unsigned int Skeleton::getNumBones() {
+        return num_bones_;
+    }
+
     void Skeleton::setCurrentAnimation(size_t index) {
         current_animation_ = &animations_[index];
     }

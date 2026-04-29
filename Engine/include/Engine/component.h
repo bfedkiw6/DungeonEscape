@@ -43,5 +43,10 @@ struct CollisionComponent : Component {
     float height;
 };
 
+struct SkinnedMeshComponent : Component {
+    gl::SkinnedMesh* mesh;
+    bool playing = true;
+};
+
 
 #endif // COMPONENT_H

@@ -20,19 +20,23 @@ public:
     void addTransformComp();
     void addDrawableComp();
     void addCollisionComp();
+    void addSkinnedMeshComp();
 
     void removeTransformComp();
     void removeDrawableComp();
     void removeCollisionComp();
+    void removeSkinnedMeshComp();
 
     TransformComponent* getTransformComp();
     DrawableComponent*  getDrawableComp();
     CollisionComponent* getCollisionComp();
+    SkinnedMeshComponent* getSkinnedMeshComp();
 
 private:
     TransformComponent* m_transform;
     DrawableComponent*  m_drawable;
     CollisionComponent* m_collision;
+    SkinnedMeshComponent* m_skinned;
 };
 
 #endif // GAMEOBJECT_H

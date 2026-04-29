@@ -39,8 +39,8 @@ BasicGame::BasicGame() {
     world.addSystem(&collision_system);
     world.addSystem(&obj_system);
     world.addSystem(&particle_system);
+    world.addSystem(&animation_system);
 
-    //map_mesh = gl::Mesh::loadStaticMesh("resources/Models/test.obj");
     map_mesh = gl::Mesh::loadStaticMesh("resources/Models/Map/map.obj");
     createObjects();
 
@@ -51,6 +51,7 @@ BasicGame::BasicGame() {
 
 void BasicGame::createObjects() {
     createPlayer();
+    createGuard();
     createMap();
     createWalls();
     createMagicSpots();
@@ -80,6 +81,35 @@ void BasicGame::createPlayer() {
     draw_system.addGameObject(player_obj);
     collision_system.addGameObject(player_obj);
 }
+
+void BasicGame::createGuard() {
+    guard_obj = world.addGameObject();
+
+    guard_obj->addTransformComp();
+    TransformComponent* gt = guard_obj->getTransformComp();
+    gt->pos = glm::vec3(-16.6, -3.0, 16.25); // TODO: Need to see where to actually place in the world
+    gt->scale = glm::vec3(2.5f, 2.5f, 2.5f); // TODO: adjust scale
+    gt->rotate = glm::rotate(gt->rotate, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+    guard_obj->addCollisionComp();
+    CollisionComponent* gc = guard_obj->getCollisionComp();
+    gc->radius = 0.5f; // TODO: adjust
+    gc->height = 1.0f; // TODO: adjust
+    gc->shape = CollisionShape::CYLINDER;
+
+    guard_obj->addSkinnedMeshComp();
+    SkinnedMeshComponent* gs = guard_obj->getSkinnedMeshComp();
+    gs->mesh = gl::Mesh::loadSkinnedMesh("resources/models/Guard/Waving.fbx");
+    if (gs->mesh) {
+        gs->mesh->skeleton.setCurrentAnimation(0);
+    }
+
+    draw_system.addGameObject(guard_obj);
+    collision_system.addGameObject(guard_obj);
+    animation_system.addGameObject(guard_obj);
+}
+
 
 void BasicGame::createMap() {
     map_obj = world.addGameObject();
@@ -176,32 +206,6 @@ void BasicGame::createMagicSpots() {
     // TODO: possibly add near places where the puzzles should go as a clue
 }
 
-/*bool BasicGame::findObjectOverlap(GameObject* a, GameObject* b) {
-    TransformComponent* trans_a = a->getTransformComp();
-    CollisionComponent* col_a = a->getCollisionComp();
-    TransformComponent* trans_b = b->getTransformComp();
-    CollisionComponent* col_b = b->getCollisionComp();
-
-    MTV result;
-    if (col_a->shape == CollisionShape::CYLINDER && col_b->shape == CollisionShape::CYLINDER) {
-        // Cases: log v log
-        CylinderCollider colA(trans_a, col_a->radius, col_a->height);
-        CylinderCollider colB(trans_b, col_b->radius, col_b->height);
-        result = colA.getMTV(&colB);
-    } else if (col_a->shape == CollisionShape::SPHERE && col_b->shape == CollisionShape::SPHERE) {
-        // Cases: coin v coin
-        SphereCollider colA(trans_a, col_a->radius);
-        SphereCollider colB(trans_b, col_b->radius);
-        result = colA.getMTV(&colB);
-    } else if (col_a->shape == CollisionShape::SPHERE && col_b->shape == CollisionShape::CYLINDER) {
-        // Cases: coin v log
-        SphereCollider colA(trans_a, col_a->radius);
-        CylinderCollider colB(trans_b, col_b->radius, col_b->height);
-        result = colA.getMTV(&colB);
-    }
-    return result.collision;
-}*/
-
 void BasicGame::draw() {
     if (screen.getType() != ScreenType::GAME) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -236,6 +240,7 @@ void BasicGame::update(double delta_time) {
     collision_system.updateWorld(world, dt);
     obj_system.updateWorld(world, dt);
     particle_system.updateWorld(world, dt);
+    animation_system.updateWorld(world, dt);
 }
 
 void BasicGame::resetLevel() {

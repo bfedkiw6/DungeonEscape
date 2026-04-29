@@ -1,8 +1,5 @@
 #include <Engine/Systems/drawsystem.h>
-#include <Engine/gameobject.h>
 #include <Engine/Systems/particlesystem.h>
-#include <algorithm>
-#include <iostream>
 
 void DrawSystem::setCamera(gl::Camera* cam) {
     m_cam = cam;
@@ -19,37 +16,27 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
     gl::Graphics::setCameraUniforms(m_cam);
     gl::Graphics::setLights(lights);
 
-    Frustum frustum = createFrustumFromCamera();
+    //Frustum frustum = createFrustumFromCamera();
     std::vector<InstanceInput> instanced_objs;
 
     for (GameObject* obj : m_objects) {
         TransformComponent* transform = obj->getTransformComp();
         DrawableComponent* draw = obj->getDrawableComp();
+        SkinnedMeshComponent* skin = obj->getSkinnedMeshComp();
+
+        // Animation drawing
+        if (transform != nullptr && skin != nullptr && skin->mesh != nullptr) {
+            drawAnimation(skin, transform);
+            continue;
+        }
+
+        // Other drawing
         if (transform != nullptr && draw != nullptr && draw->visible == true) {
             // Set up the transform before drawing
             Transform obj_transform;
             obj_transform.setScale(transform->scale);
             obj_transform.translate(transform->pos);
             obj_transform.setRotation(transform->rotate);
-
-            // Frustum Culling
-            /*Sphere cull;
-            cull.center = glm::vec3(0.0f);
-            float max_scale = std::max(transform->scale.x, std::max(transform->scale.y, transform->scale.z));
-            CollisionComponent* col = obj->getCollisionComp();
-            if (col != nullptr) {
-                cull.radius = col->radius;
-            } else if (obj->type == ObjectType::MAP) {
-                cull.radius = 500.0f;
-            } else {
-                cull.radius = 5.0f;
-            }
-            // Don't draw object if not in view
-            if (!cull.isOnFrustum(frustum, transform->pos, cull.radius * max_scale)) {
-                culled++;
-                continue;
-            }
-            kept++;*/
 
             if (draw->shape != nullptr) {
                 //gl::Graphics::drawObject(draw->shape, obj_transform, draw->mat); // Keep for speed test purposes
@@ -110,6 +97,56 @@ void DrawSystem::makeLights() {
         lights.push_back(torch);
     }
 
+    gl::Graphics::setLights(lights);
+}
+
+void DrawSystem::setParticleSystem(ParticleSystem* ps) {
+    particle_system = ps;
+}
+
+void DrawSystem::drawParticles() {
+    if (!particle_system) {
+        return;
+    }
+
+    gl::DrawShape* sphere = gl::Mesh::getLoadedShape("sphere");
+    if (!sphere) {
+        return;
+    }
+
+    for (const auto& p : particle_system->getParticles()) {
+        Transform t;
+        t.setScale(glm::vec3(p.size));
+        t.translate(p.pos);
+
+        gl::DrawMaterial mat;
+        mat.ambient = glm::vec3(p.color.r, p.color.g, p.color.b);
+        mat.diffuse = glm::vec3(p.color.r, p.color.g, p.color.b);
+        mat.specular = glm::vec3(0.0f);
+        mat.shininess = 1.0f;
+        mat.opacity = p.color.a;
+
+        gl::Graphics::drawObject(sphere, t, mat);
+    }
+}
+
+void DrawSystem::drawAnimation(SkinnedMeshComponent* skin, TransformComponent* transform) {
+    Transform obj_transform;
+    obj_transform.setScale(transform->scale);
+    obj_transform.translate(transform->pos);
+    obj_transform.setRotation(transform->rotate);
+
+    gl::Graphics::useSkinnedShader();
+    gl::Graphics::setCameraUniforms(m_cam);
+    gl::Graphics::setAmbientLight(glm::vec3(0.5f));
+    gl::Graphics::setLights(lights);
+
+    gl::Graphics::drawSkinnedMesh(skin->mesh, obj_transform);
+
+    // Switch shader back
+    gl::Graphics::usePhongShader();
+    gl::Graphics::setAmbientLight(glm::vec3(0.5f));
+    gl::Graphics::setCameraUniforms(m_cam);
     gl::Graphics::setLights(lights);
 }
 
@@ -187,32 +224,21 @@ void DrawSystem::drawSky() {
     }
 }
 
-void DrawSystem::setParticleSystem(ParticleSystem* ps) {
-    particle_system = ps;
-}
-
-void DrawSystem::drawParticles() {
-    if (!particle_system) {
-        return;
-    }
-
-    gl::DrawShape* sphere = gl::Mesh::getLoadedShape("sphere");
-    if (!sphere) {
-        return;
-    }
-
-    for (const auto& p : particle_system->getParticles()) {
-        Transform t;
-        t.setScale(glm::vec3(p.size));
-        t.translate(p.pos);
-
-        gl::DrawMaterial mat;
-        mat.ambient = glm::vec3(p.color.r, p.color.g, p.color.b);
-        mat.diffuse = glm::vec3(p.color.r, p.color.g, p.color.b);
-        mat.specular = glm::vec3(0.0f);
-        mat.shininess = 1.0f;
-        mat.opacity = p.color.a;
-
-        gl::Graphics::drawObject(sphere, t, mat);
-    }
-}
+// Frustum Culling --> was in update world
+/*Sphere cull;
+            cull.center = glm::vec3(0.0f);
+            float max_scale = std::max(transform->scale.x, std::max(transform->scale.y, transform->scale.z));
+            CollisionComponent* col = obj->getCollisionComp();
+            if (col != nullptr) {
+                cull.radius = col->radius;
+            } else if (obj->type == ObjectType::MAP) {
+                cull.radius = 500.0f;
+            } else {
+                cull.radius = 5.0f;
+            }
+            // Don't draw object if not in view
+            if (!cull.isOnFrustum(frustum, transform->pos, cull.radius * max_scale)) {
+                culled++;
+                continue;
+            }
+            kept++;*/

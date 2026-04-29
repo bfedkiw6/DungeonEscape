@@ -14,6 +14,10 @@ void GameObject::addCollisionComp() {
     m_collision = new CollisionComponent;
 }
 
+void GameObject::addSkinnedMeshComp() {
+    m_skinned = new SkinnedMeshComponent;
+}
+
 void GameObject::removeTransformComp() {
     delete m_transform;
     m_transform = nullptr;
@@ -29,6 +33,11 @@ void GameObject::removeCollisionComp() {
     m_collision = nullptr;
 }
 
+void GameObject::removeSkinnedMeshComp() {
+    delete m_skinned;
+    m_skinned = nullptr;
+}
+
 TransformComponent* GameObject::getTransformComp() {
     return m_transform;
 }
@@ -39,4 +48,8 @@ DrawableComponent* GameObject::getDrawableComp()  {
 
 CollisionComponent* GameObject::getCollisionComp() {
     return m_collision;
+}
+
+SkinnedMeshComponent* GameObject::getSkinnedMeshComp() {
+    return m_skinned;
 }

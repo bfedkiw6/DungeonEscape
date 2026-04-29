@@ -2,6 +2,7 @@
 #define DRAWSYSTEM_H
 
 #include "system.h"
+#include "Engine/gameobject.h"
 #include "Engine/Graphics/camera.h"
 #include "Engine/Graphics/mesh.h"
 #include "Engine/Systems/particlesystem.h"
@@ -44,9 +45,11 @@ public:
     void makeLights();
     void setCamera(gl::Camera* cam);
     Frustum createFrustumFromCamera();
+
     void drawSky();
     void setParticleSystem(ParticleSystem* ps);
     void drawParticles();
+    void drawAnimation(SkinnedMeshComponent* skin, TransformComponent* transform);
 
 private:
     gl::Camera* m_cam = nullptr;
