@@ -3,6 +3,7 @@
 #include <Engine/Graphics/graphics.h>
 
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 Screen::Screen() {
     cam = std::make_unique<gl::Camera>();
@@ -15,6 +16,10 @@ Screen::Screen() {
     background_mat.textures = gl::Material::loadTexture("resources/images/magic.png");
 
     //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
+}
+
+void Screen::setCamPos(glm::vec3 pos) {
+    cam_pos = pos;
 }
 
 void Screen::draw() {
@@ -30,9 +35,12 @@ void Screen::draw() {
     } else if (type_ == ScreenType::LOSE) {
         Window::showMouse();
         drawLoseScreen();
-    } else {
-        drawGameScreen();
+    } else if (type_ == ScreenType::GUARD) {
         Window::hideMouse();
+        drawGuardDialogue();
+    } else {
+        Window::hideMouse();
+        drawGameScreen();
     }
 }
 
@@ -63,6 +71,14 @@ void Screen::keyEvent(int key, int action) {
                     switchScreen = true;
                     type_ = ScreenType::PAUSE;
                     Window::showMouse();
+                } else if (key == GLFW_KEY_T) {
+                    // Player needs to be close enough to guard for dialogue to trigger
+                    if (cam_pos.y == 0.75f && cam_pos.x < -12.0f && cam_pos.x > -16.0f
+                        && cam_pos.z < 18.0f && cam_pos.z > 14.0f) {
+                        switchScreen = true;
+                        type_ = ScreenType::GUARD;
+                        Window::hideMouse();
+                    }
                 }
                 break;
             case ScreenType::WIN:
@@ -77,6 +93,19 @@ void Screen::keyEvent(int key, int action) {
                     switchScreen = true;
                     type_ = ScreenType::GAME;
                     Window::hideMouse();
+                }
+                break;
+            case ScreenType::GUARD:
+                if (key == GLFW_KEY_ENTER) {
+                    if (guard_dg_num == 2) {
+                        guard_dg_num = 0;
+                        switchScreen = true;
+                        type_ = ScreenType::GAME;
+                        Window::hideMouse();
+                    } else {
+                        // Progress dialogue
+                        guard_dg_num++;
+                    }
                 }
                 break;
         }
@@ -114,22 +143,23 @@ void Screen::drawMainMenu() {
     gl::Graphics::useTextShader();
     glm::vec2 size = Window::getSize();
     glm::vec2 center = size/2.f;
-    gl::Graphics::drawText("Welcome to Magic Escape!",
+    gl::Graphics::drawText("You've woken up in a wizard's dungeon with",
                            glm::vec2(center.x, center.y - 200.0f), 48.0f,
-                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Solve puzzles to escape from the wizard's dungeon",
+                           glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("no memory. Explore your surroundings,",
                            glm::vec2(center.x, center.y - 140.0f), 48.0f,
-                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Happy Solving!",
+                           glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("maybe there is some way out...",
                            glm::vec2(center.x, center.y - 80.0f), 48.0f,
-                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
+                           glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press ENTER to play",
                            glm::vec2(center.x, center.y + 140.0f), 48.0f,
-                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
+                           glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press ESC to pause & see controls",
                            glm::vec2(center.x, center.y + 200.0f), 48.0f,
-                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
+                           glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
 }
+
 
 void Screen::drawPauseScreen() {
     drawGivenShape(background, tb, background_mat);
@@ -154,18 +184,19 @@ void Screen::drawPauseScreen() {
 }
 
 void Screen::drawWinScreen() {
+    drawGivenShape(background, tb, background_mat);
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
     gl::Graphics::drawText("YOU WIN!",
                            glm::vec2(center.x, center.y - 20.0f), 48.0f,
-                           glm::vec3(0.0f, 0.0f, 1.0f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("You collected " + std::to_string(prev_coins_) + " coins",
+                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("You collected all the gems!",
                            glm::vec2(center.x, center.y + 40.0f), 48.0f,
-                           glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Press ENTER to play again",
+                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Thanks for playing :)",
                            glm::vec2(center.x, center.y + 100.0f), 48.0f,
-                           glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
+                           glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
 }
 
 void Screen::drawLoseScreen() {
@@ -182,18 +213,41 @@ void Screen::drawLoseScreen() {
 
 void Screen::drawGameScreen() {
     gl::Graphics::useTextShader();
-    /*gl::Graphics::drawText("Coins Collected: " + std::to_string(coins_),
+    gl::Graphics::drawText("Gems Collected: " + std::to_string(gems_),
                            glm::vec2(20.0f, 40.0f), 32.0f,
-                           glm::vec3(0.0f, 0.0f, 0.0f), gl::TextAlign::LEFT);*/
+                           glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::LEFT);
+
 }
 
-void Screen::incrementCoins() {
-    coins_++;
+void Screen::incrementGems() {
+    gems_++;
 }
 
-void Screen::resetCoins() {
-    prev_coins_ = coins_;
-    coins_ = 0;
+void Screen::resetGems() {
+    prev_gems_ = gems_;
+    gems_ = 0;
+}
+
+void Screen::drawGuardDialogue() {
+    gl::Graphics::useTextShader();
+    glm::vec2 center = Window::getSize()/2.f;
+
+    if (guard_dg_num == 0) {
+        gl::Graphics::drawText("HEY YOU! I've seemed to misplaced the door key.",
+                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+    } else if (guard_dg_num == 1) {
+        gl::Graphics::drawText("Go collect the three magic gems around the map so we can be free.",
+                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+    } else if (guard_dg_num == 2) {
+        gl::Graphics::drawText("They are guarded by puzzles so good luck.",
+                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+    }
+    gl::Graphics::drawText("Press ENTER to continue",
+                           glm::vec2(center.x, center.y - 260.0f), 25.0f,
+                           glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
 }
 
 void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat) {

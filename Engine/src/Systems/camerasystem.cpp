@@ -21,6 +21,10 @@ float CameraSystem::getCameraDist() {
     return camera_dist;
 }
 
+glm::vec3 CameraSystem::getCameraPos() {
+    return m_cam->getPosition();
+}
+
 void CameraSystem::reset() {
     if (!m_cam) {
         return;

@@ -10,7 +10,8 @@ enum class ScreenType {
     PAUSE,
     GAME,
     WIN,
-    LOSE
+    LOSE,
+    GUARD
 };
 
 class Screen : public Game {
@@ -31,8 +32,11 @@ public:
     ScreenType getType();
     void setType(ScreenType type);
     bool switchScreen = false;
-    void incrementCoins();
-    void resetCoins();
+
+    void incrementGems();
+    void resetGems();
+
+    void setCamPos(glm::vec3 pos);
 
 private:
     void drawMainMenu();
@@ -40,15 +44,21 @@ private:
     void drawWinScreen();
     void drawLoseScreen();
     void drawGameScreen();
+    void drawGuardDialogue();
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
-    int coins_;
-    int prev_coins_;
+    int gems_ = 0;
+    int prev_gems_;
     std::unique_ptr<gl::Camera> cam;
+
+    glm::vec3 cam_pos;
 
     Transform tb, tf;
     gl::DrawShape* background;
     gl::DrawMesh* skull_mesh;
     gl::DrawMaterial background_mat;
+
+    int guard_dg_num = 0;
+    bool guard_dialogue = false;
 };

@@ -13,6 +13,7 @@ public:
     void setMouseDelta(glm::vec2 delta);
     void resizeWindowEvent(int new_width, int new_height);
     float getCameraDist();
+    glm::vec3 getCameraPos();
     void reset();
 
 private:

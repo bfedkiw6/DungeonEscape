@@ -21,6 +21,9 @@ BasicGame::BasicGame() {
 
     cam = std::make_unique<gl::Camera>();
     cam->setPosition(glm::vec3(0.0f, cam->getHeight(), 0.0f));
+    cam->setHorizAngle(200.0f);
+    cam->setVertAngle(-45.0f);
+    cam->setLook(cam->calcNewLook());
 
     // Setting up each system (they each rely on camera so pass it in)
     camera_system.setCamera(cam.get());
@@ -67,7 +70,7 @@ void BasicGame::createPlayer() {
     player_obj->getDrawableComp()->visible = false;
 
     player_obj->addTransformComp();
-    glm::vec3 player_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 player_pos = glm::vec3(11.5118f, 0.0f, 29.7553f);
     player_obj->getTransformComp()->pos = player_pos;
     player_obj->getTransformComp()->scale = glm::vec3(3.0f, 3.0f, 3.0f);
 
@@ -87,10 +90,9 @@ void BasicGame::createGuard() {
 
     guard_obj->addTransformComp();
     TransformComponent* gt = guard_obj->getTransformComp();
-    gt->pos = glm::vec3(-16.6, -3.0, 16.25); // TODO: Need to see where to actually place in the world
-    gt->scale = glm::vec3(2.5f, 2.5f, 2.5f); // TODO: adjust scale
+    gt->pos = glm::vec3(-16.6, -3.0, 16.25);
+    gt->scale = glm::vec3(2.5f, 2.5f, 2.5f);
     gt->rotate = glm::rotate(gt->rotate, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
 
     guard_obj->addCollisionComp();
     CollisionComponent* gc = guard_obj->getCollisionComp();
@@ -130,7 +132,7 @@ void BasicGame::createMap() {
 void BasicGame::createWalls() {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> scales;
-    int num_walls = 10;
+    int num_walls = 11;
     getWallTransforms(positions, scales);
     //gl::DrawShape* wall_shape = gl::Mesh::getLoadedShape("cube");
 
@@ -185,6 +187,10 @@ void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector
 
     positions.push_back(glm::vec3(47.0, 0.75, 17.1381));
     scales.push_back(glm::vec3(34.0, 6.0, 2.5));
+
+    // Wall blocking exit door - delete when all gems found
+    positions.push_back(glm::vec3(-18.9354, 0.75, 2.25828));
+    scales.push_back(glm::vec3(2.5, 6.0, 5.0));
 }
 
 void BasicGame::createMagicSpots() {
@@ -207,7 +213,7 @@ void BasicGame::createMagicSpots() {
 }
 
 void BasicGame::draw() {
-    if (screen.getType() != ScreenType::GAME) {
+    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
         screen.draw();
         return;
@@ -218,13 +224,14 @@ void BasicGame::draw() {
 
 
 void BasicGame::update(double delta_time) {
-    if (screen.getType() != ScreenType::GAME) {
+    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
+    screen.setCamPos(camera_system.getCameraPos()); // For screen changes
 
     // Particles spawn over time
     particle_timer += dt;
@@ -235,16 +242,30 @@ void BasicGame::update(double delta_time) {
         particle_timer = 0.0f;
     }
 
-    character_system.updateWorld(world, dt);
-    camera_system.updateWorld(world, dt);
+    // System updates
+    if (screen.getType() != ScreenType::GUARD) {
+        // When talking to guard, stop camera & player from moving
+        character_system.updateWorld(world, dt);
+        camera_system.updateWorld(world, dt);
+    }
     collision_system.updateWorld(world, dt);
     obj_system.updateWorld(world, dt);
     particle_system.updateWorld(world, dt);
     animation_system.updateWorld(world, dt);
+
+    // Gem update & check
+    /*if (puzzle sucess) {
+        screen.incrementGems();
+    }*/
+    // TEMP: auto win when find sll gems - probs change to u need to go put them in the door
+    if (found_gems == 3) {
+        screen.setType(ScreenType::WIN);
+        screen.draw();
+    }
 }
 
 void BasicGame::resetLevel() {
-    screen.resetCoins();
+    screen.resetGems();
     clearObjects();
 
     glm::vec3 player_pos = glm::vec3(0.0f, 0.0f, 0.0f);

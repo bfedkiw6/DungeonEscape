@@ -82,8 +82,8 @@ private:
     // Rand
     Screen screen;
     ScreenType screen_type;
-
     std::unique_ptr<gl::Camera> cam;
-
     glm::vec2 prev_mouse_pos = glm::vec2(0.0f);
+
+    int found_gems = 0;
 };
