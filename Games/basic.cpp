@@ -194,10 +194,13 @@ void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector
 }
 
 void BasicGame::createMagicSpots() {
+    static std::mt19937 gen(std::random_device{}());
+    std::uniform_real_distribution<float> height_fall(5.5f, 7.0f);
+
     // By the exit door
-    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, 2.4627), true});
-    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, 6.1434), true});
-    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, 6.0, -1.30808), true});
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 2.4627), true});
+    /*magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 6.1434), true});
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), -1.30808), true});
 
     // By lantern
     magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -14.02), false});
@@ -207,7 +210,7 @@ void BasicGame::createMagicSpots() {
     // By brooms
     magic_spots.push_back(MagicVal{glm::vec3(59.2251, 6.0, -29.0077), true});
     magic_spots.push_back(MagicVal{glm::vec3(61.2519, -5.0, -27.5818), false});
-    magic_spots.push_back(MagicVal{glm::vec3(62.8983, 6.0, -25.4046), true});
+    magic_spots.push_back(MagicVal{glm::vec3(62.8983, 6.0, -25.4046), true});*/
 
     // TODO: possibly add near places where the puzzles should go as a clue
 }
@@ -235,7 +238,7 @@ void BasicGame::update(double delta_time) {
 
     // Particles spawn over time
     particle_timer += dt;
-    if (particle_timer > 4.0f) {
+    if (particle_timer > 0.75f) {
         for (MagicVal v : magic_spots) {
             particle_system.addMagicBurst(v.pos, v.float_down);
         }
@@ -257,7 +260,7 @@ void BasicGame::update(double delta_time) {
     /*if (puzzle sucess) {
         screen.incrementGems();
     }*/
-    // TEMP: auto win when find sll gems - probs change to u need to go put them in the door
+    // TEMP: auto win when find all gems - probs change to u need to go put them in the door
     if (found_gems == 3) {
         screen.setType(ScreenType::WIN);
         screen.draw();

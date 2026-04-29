@@ -118,7 +118,7 @@ namespace gl {
     }
 
     void Graphics::setLights(const std::vector<Light>& lights) {
-        constexpr int MAX_LIGHTS = 8;
+        constexpr int MAX_LIGHTS = 10;
         int num_lights = std::min(static_cast<int>(lights.size()), MAX_LIGHTS);
 
         active_shader_->setInt("num_lights", num_lights);

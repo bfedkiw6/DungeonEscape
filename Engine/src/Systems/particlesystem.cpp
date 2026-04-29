@@ -29,7 +29,7 @@ void ParticleSystem::moveParticles() {
         p.lifetime--;
 
         if (p.type == ParticleType::STREAMER) {
-            p.vel.y -= 0.0003f;
+            p.vel.y -= 0.0006f;
         } else if (p.type == ParticleType::BALLISTIC) {
             p.vel.y += 0.0003f;
         }
@@ -42,15 +42,16 @@ void ParticleSystem::moveParticles() {
 void ParticleSystem::addMagicBurst(glm::vec3 center, bool float_down) {
     static std::mt19937 gen(std::random_device{}());
 
-    std::uniform_real_distribution<float> dist_xz(-0.025f, 0.025f);
+    std::uniform_real_distribution<float> dist_xz(-0.05f, 0.05f);
+    std::uniform_real_distribution<float> dist_y(-0.5f, 2.0f);
     std::uniform_real_distribution<float> dist_down_y(-0.002f, 0.001f);
     std::uniform_real_distribution<float> dist_up_y(0.001f, 0.004f);
     std::uniform_int_distribution<int> color(0, 2);
     std::uniform_int_distribution<int> type(0, 1);
 
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 75; i++) {
         Particle p;
-        p.pos = center + glm::vec3(dist_xz(gen), 0.0f, dist_xz(gen));
+        p.pos = center + glm::vec3(dist_xz(gen), dist_y(gen), dist_xz(gen));
 
         if (float_down) {
             p.vel = glm::vec3(dist_xz(gen), dist_up_y(gen), dist_xz(gen));

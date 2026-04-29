@@ -97,7 +97,7 @@ void Screen::keyEvent(int key, int action) {
                 break;
             case ScreenType::GUARD:
                 if (key == GLFW_KEY_ENTER) {
-                    if (guard_dg_num == 2) {
+                    if (guard_dg_num == 3) {
                         guard_dg_num = 0;
                         switchScreen = true;
                         type_ = ScreenType::GAME;
@@ -155,8 +155,11 @@ void Screen::drawMainMenu() {
     gl::Graphics::drawText("Press ENTER to play",
                            glm::vec2(center.x, center.y + 140.0f), 48.0f,
                            glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Press ESC to pause & see controls",
+    gl::Graphics::drawText("Press T to interact",
                            glm::vec2(center.x, center.y + 200.0f), 48.0f,
+                           glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Press ESC to pause & see controls",
+                           glm::vec2(center.x, center.y + 260.0f), 48.0f,
                            glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
 }
 
@@ -180,6 +183,9 @@ void Screen::drawPauseScreen() {
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("SPACE = Jump",
                            glm::vec2(center.x, center.y + 160.0f), 48.0f,
+                           glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("T = Interact",
+                           glm::vec2(center.x, center.y + 220.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
 }
 
@@ -237,11 +243,15 @@ void Screen::drawGuardDialogue() {
                                glm::vec2(center.x, center.y - 300.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 1) {
-        gl::Graphics::drawText("Go collect the three magic gems around the map so we can be free.",
+        gl::Graphics::drawText("Go collect the three magic gems around the dungeon so we can be free.",
                                glm::vec2(center.x, center.y - 300.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 2) {
-        gl::Graphics::drawText("They are guarded by puzzles so good luck.",
+        gl::Graphics::drawText("The gems are guarded by puzzles hidden around.",
+                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+    } else if (guard_dg_num == 3) {
+        gl::Graphics::drawText("The magic particles may point you in the right direction!",
                                glm::vec2(center.x, center.y - 300.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     }

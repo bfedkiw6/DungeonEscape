@@ -90,6 +90,7 @@ void DrawSystem::makeLights() {
     torch_positions.push_back(glm::vec3( 20.7f, 1.0f, -16.7f));
     torch_positions.push_back(glm::vec3(-5.7f, 1.0f, -18.6f));
     torch_positions.push_back(glm::vec3(14.2f, 2.0f, 12.8f));
+    //torch_positions.push_back(glm::vec3(0.0f, 2.0f, 0.0f));
 
     for (const auto& pos : torch_positions) {
         gl::PointLight torch(pos, glm::vec3(1.0f, 0.06f, 0.01f));
