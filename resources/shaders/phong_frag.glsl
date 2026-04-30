@@ -110,6 +110,20 @@ void main() {
         result += diffuseContribution + specularContribution;
     }
 
+    // Fog
+    float dist = length(camera_pos - FragPos);
+    float fogAmount = clamp(1.0 - exp(-dist * 0.025), 0.0, 0.3); // Exponential fog
+    vec3 fogColor = vec3(0.06, 0.045, 0.09);
+    result = mix(result, fogColor, fogAmount);
+    // Volumetric Glow
+    for (int i = 0; i < num_lights; i++) {
+        if (lights[i].type == LIGHT_TYPE_POINT) {
+            float light_dist = length(lights[i].position - FragPos);
+            float glow = exp(-light_dist * 0.25); // Exponential glow
+            result += lights[i].color * glow * 0.10;
+        }
+    }
+
     result = clamp(result, 0.0, 1.0);
     FragColor = vec4(result, opacity);
 }

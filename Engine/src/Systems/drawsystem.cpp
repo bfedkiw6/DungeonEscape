@@ -81,6 +81,7 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
     std::cout << "Submitted: " << kept << std::endl;*/
 }
 
+
 void DrawSystem::makeLights() {
     torch_positions.clear();
     roomLightsOne();

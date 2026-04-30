@@ -1,6 +1,7 @@
 #include <Engine/screen.h>
 #include <Engine/window.h>
 #include <Engine/Graphics/graphics.h>
+#include <Engine/Systems/drawsystem.h>
 
 #include <GLFW/glfw3.h>
 #include <iostream>

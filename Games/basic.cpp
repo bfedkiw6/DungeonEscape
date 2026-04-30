@@ -30,8 +30,8 @@ BasicGame::BasicGame() {
     world.addSystem(&camera_system);
 
     draw_system.setCamera(cam.get());
-    draw_system.makeLights();
     draw_system.setParticleSystem(&particle_system);
+    draw_system.makeLights();
     world.addSystem(&draw_system);
 
     character_system.setCamera(cam.get());
@@ -231,6 +231,7 @@ void BasicGame::update(double delta_time) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
+
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
