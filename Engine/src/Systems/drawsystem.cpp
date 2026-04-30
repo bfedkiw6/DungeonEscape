@@ -83,18 +83,13 @@ void DrawSystem::updateWorld(GameWorld& world, float dt) {
 
 void DrawSystem::makeLights() {
     torch_positions.clear();
-    torch_positions.push_back(glm::vec3( -11.4f, 1.0f, 3.09f));
-    torch_positions.push_back(glm::vec3( 18.9f, 1.0f, 22.7f));
-    torch_positions.push_back(glm::vec3(47.4f, 1.0f, -20.1f));
-    torch_positions.push_back(glm::vec3(47.9f, 1.0f, 9.4f));
-    torch_positions.push_back(glm::vec3( 20.7f, 1.0f, -16.7f));
-    torch_positions.push_back(glm::vec3(-5.7f, 1.0f, -18.6f));
-    torch_positions.push_back(glm::vec3(14.2f, 2.0f, 12.8f));
-    //torch_positions.push_back(glm::vec3(0.0f, 2.0f, 0.0f));
+    roomLightsOne();
+    roomLightsTwo();
+    roomLightsThree();
 
     for (const auto& pos : torch_positions) {
-        gl::PointLight torch(pos, glm::vec3(1.0f, 0.06f, 0.01f));
-        torch.color_ = glm::vec3(2.0f, 1.0f, 0.4f);
+        gl::PointLight torch(pos, glm::vec3(1.0f, 0.15f, 0.035f));
+        torch.color_ = glm::vec3(2.2f, 1.2f, 0.5f);
         lights.push_back(torch);
     }
 
@@ -243,3 +238,49 @@ void DrawSystem::drawSky() {
                 continue;
             }
             kept++;*/
+
+void DrawSystem::roomLightsOne() {
+    torch_positions.push_back(glm::vec3(-17.37, 0.75, 17.1524));
+    torch_positions.push_back(glm::vec3(-16.6798, 0.75, 32.3025));
+    torch_positions.push_back(glm::vec3(-9.24321, 0.75, 32.261));
+    torch_positions.push_back(glm::vec3( 0.954682, 0.75, 32.2503));
+    torch_positions.push_back(glm::vec3(11.4536, 0.75, 32.2963));
+    torch_positions.push_back(glm::vec3(19.9578, 0.75, 32.247));
+    torch_positions.push_back(glm::vec3(29.6603, 0.75, 27.2441));
+    torch_positions.push_back(glm::vec3(29.2209, 0.75, 17.0755));
+    torch_positions.push_back(glm::vec3(28.8954, 0.75, 7.24049));
+    torch_positions.push_back(glm::vec3(29.106, 0.75, -2.57178));
+    torch_positions.push_back(glm::vec3(17.049, 0.75, -3.30606));
+    torch_positions.push_back(glm::vec3(7.14047, 0.75, -3.18098));
+    torch_positions.push_back(glm::vec3(-17.2789, 0.75, -2.63009));
+    torch_positions.push_back(glm::vec3(-16.8393, 0.75, 7.63103));
+}
+
+void DrawSystem::roomLightsTwo() {
+    torch_positions.push_back(glm::vec3(6.45152, 0.75, -6.44373));
+    torch_positions.push_back(glm::vec3(17.0019, 0.75, -6.47626));
+    torch_positions.push_back(glm::vec3(29.1994, 0.75, -12.1231));
+    torch_positions.push_back(glm::vec3(29.0807, 0.75, -21.9941));
+    torch_positions.push_back(glm::vec3(21.0264, 0.75, -29.431));
+    torch_positions.push_back(glm::vec3(11.3997, 0.75, -29.4283));
+    torch_positions.push_back(glm::vec3(0.870929, 0.75, -29.3726));
+    torch_positions.push_back(glm::vec3(-8.64682, 0.75, -29.4248));
+    torch_positions.push_back(glm::vec3(-17.2988, 0.75, -29.423));
+    torch_positions.push_back(glm::vec3(-17.368, 0.75, -18.5898));
+    torch_positions.push_back(glm::vec3(-9.36356, 0.75, -6.43185));
+}
+
+void DrawSystem::roomLightsThree() {
+    torch_positions.push_back(glm::vec3(32.667, 0.75, -2.33465));
+    torch_positions.push_back(glm::vec3(32.9847, 0.75, 7.42907));
+    torch_positions.push_back(glm::vec3(39.7105, 0.75, 15.1759));
+    torch_positions.push_back(glm::vec3(52.9471, 0.75, 15.54));
+    torch_positions.push_back(glm::vec3(63.177, 0.75, 6.46976));
+    torch_positions.push_back(glm::vec3(63.1098, 0.75, -2.14008));
+    torch_positions.push_back(glm::vec3(63.0913, 0.75, -11.9294));
+    torch_positions.push_back(glm::vec3(63.0637, 0.75, -21.1811));
+    torch_positions.push_back(glm::vec3(52.8011, 0.75, -29.3722));
+    torch_positions.push_back(glm::vec3(39.8542, 0.75, -29.3811));
+    torch_positions.push_back(glm::vec3(32.6681, 0.75, -22.5028));
+    torch_positions.push_back(glm::vec3(32.7067, 0.75, -12.459));
+}

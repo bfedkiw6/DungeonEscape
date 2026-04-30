@@ -31,7 +31,7 @@ uniform float opacity;
 // Light types - matching src/Light.h
 const int LIGHT_TYPE_DIRECTIONAL = 1;
 const int LIGHT_TYPE_POINT       = 2;
-const int MAX_LIGHTS = 8;
+const int MAX_LIGHTS = 40;
 
 // Light structure - matching src/Light.h
 struct Light {

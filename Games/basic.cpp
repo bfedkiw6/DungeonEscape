@@ -44,7 +44,7 @@ BasicGame::BasicGame() {
     world.addSystem(&particle_system);
     world.addSystem(&animation_system);
 
-    map_mesh = gl::Mesh::loadStaticMesh("resources/Models/Map/map.obj");
+    map_mesh = gl::Mesh::loadStaticMesh("resources/models/Map/map.obj");
     createObjects();
 
     auto load_end = std::chrono::high_resolution_clock::now();

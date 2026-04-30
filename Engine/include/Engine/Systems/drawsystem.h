@@ -42,7 +42,12 @@ struct Sphere : public Volume {
 class DrawSystem : public System {
 public:
     void updateWorld(GameWorld& world, float dt) override;
+
     void makeLights();
+    void roomLightsOne();
+    void roomLightsTwo();
+    void roomLightsThree();
+
     void setCamera(gl::Camera* cam);
     Frustum createFrustumFromCamera();
 
