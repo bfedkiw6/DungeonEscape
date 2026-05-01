@@ -49,10 +49,15 @@ private:
     };
     std::vector<MagicVal> magic_spots;
     float particle_timer = 4.0f;
+    float particle_audio_timer = 0.0f;
     void createMagicSpots();
+    void updateMagicSpots(float dt);
 
     void resetLevel();
     void clearObjects();
+
+    // Audio setup
+    void setupAudio();
 
     // World & Systems
     GameWorld world;

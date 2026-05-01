@@ -127,7 +127,7 @@ namespace gl {
         active_sounds_.push_back({alias, glm::vec3(0.0f), false});
     }
 
-    void AudioEngine::playSound3D(const std::string& name, const glm::vec3& worldPos, float pitch) {
+    void AudioEngine::playSound3D(const std::string& name, const glm::vec3& worldPos, float pitch, float volume) {
         auto it = sounds_.find(name);
         if (it == sounds_.end()) {
             debug::warn("Sound not found: %s", name.c_str());
@@ -136,9 +136,11 @@ namespace gl {
 
         Sound alias = LoadSoundAlias(it->second.sound);
         SetSoundPitch(alias, pitch);
-        PlaySound(alias);
 
-        active_sounds_.push_back({alias, worldPos, true});
+        active_sounds_.push_back({alias, worldPos, true, volume});
+        updateSpatialAudio(active_sounds_.back());
+
+        PlaySound(alias);
     }
 
     void AudioEngine::playMusic(const std::string& name) {
@@ -282,7 +284,8 @@ namespace gl {
         float distance = glm::length(to_source);
 
         // Calculate volume based on distance
-        float volume = std::clamp(1.0f - distance / max_distance_, 0.0f, 1.0f);
+        float distance_volume = std::clamp(1.0f - distance / max_distance_, 0.0f, 1.0f);
+        float volume = alias.base_volume * distance_volume;
 
         // Calculate pan based on left-right position
         float pan = 0.5f; // Center

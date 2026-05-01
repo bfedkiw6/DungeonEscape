@@ -40,7 +40,7 @@ namespace gl {
 
         // Sound playback
         static void playSound(const std::string& name, float volume = 1.0f, float pitch = 1.0f, float pan = 0.5f);
-        static void playSound3D(const std::string& name, const glm::vec3& worldPos, float pitch = 1.0f);
+        static void playSound3D(const std::string& name, const glm::vec3& worldPos, float pitch = 1.0f, float volume = 1.0f);
 
         // Music playback
         static void playMusic(const std::string& name);
@@ -83,6 +83,7 @@ namespace gl {
             Sound alias;
             glm::vec3 position;
             bool is_spatial;
+            float base_volume = 1.0f;
         };
 
         static void updateSpatialAudio(ActiveAlias& alias);

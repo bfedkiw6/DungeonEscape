@@ -33,6 +33,7 @@ private:
     float floor_width = 0.0f;
     float player_width = 0.0f;
     glm::vec3 old_pos;
+    float footstep_timer = 0.0f;
 };
 
 #endif // CHARACTERCONTROLLERSYSTEM_H

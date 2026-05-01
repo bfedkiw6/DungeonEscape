@@ -2,6 +2,7 @@
 #include <Engine/window.h>
 #include <Engine/Graphics/graphics.h>
 #include <Engine/Systems/drawsystem.h>
+#include <Engine/Audio/audio-engine.h>
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -76,6 +77,7 @@ void Screen::keyEvent(int key, int action) {
                     // Player needs to be close enough to guard for dialogue to trigger
                     if (cam_pos.y == 0.75f && cam_pos.x < -12.0f && cam_pos.x > -16.0f
                         && cam_pos.z < 18.0f && cam_pos.z > 14.0f) {
+                        gl::AudioEngine::playSound("guard_hey", 0.45f);
                         switchScreen = true;
                         type_ = ScreenType::GUARD;
                         Window::hideMouse();
@@ -98,7 +100,11 @@ void Screen::keyEvent(int key, int action) {
                 break;
             case ScreenType::GUARD:
                 if (key == GLFW_KEY_ENTER) {
+                    if (guard_dg_num == 1) {
+                        gl::AudioEngine::playSound("guard_grunt", 0.4f);
+                    }
                     if (guard_dg_num == 3) {
+                        gl::AudioEngine::playSound("guard_grunt", 0.4f);
                         guard_dg_num = 0;
                         switchScreen = true;
                         type_ = ScreenType::GAME;
@@ -241,23 +247,23 @@ void Screen::drawGuardDialogue() {
 
     if (guard_dg_num == 0) {
         gl::Graphics::drawText("HEY YOU! I've seemed to misplaced the door key.",
-                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 1) {
         gl::Graphics::drawText("Go collect the three magic gems around the dungeon so we can be free.",
-                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 2) {
         gl::Graphics::drawText("The gems are guarded by puzzles hidden around.",
-                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 3) {
         gl::Graphics::drawText("The magic particles may point you in the right direction!",
-                               glm::vec2(center.x, center.y - 300.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     }
     gl::Graphics::drawText("Press ENTER to continue",
-                           glm::vec2(center.x, center.y - 260.0f), 25.0f,
+                           glm::vec2(center.x, center.y - 280.0f), 25.0f,
                            glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
 }
 

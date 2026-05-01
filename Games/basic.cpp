@@ -6,6 +6,7 @@
 #include <Engine/collision/CylinderCollider.h>
 #include <Engine/collision/SphereCollider.h>
 #include <Engine/Systems/aisystem.h>
+#include <Engine/Audio/audio-engine.h>
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -44,8 +45,12 @@ BasicGame::BasicGame() {
     world.addSystem(&particle_system);
     world.addSystem(&animation_system);
 
+    // Object setup
     map_mesh = gl::Mesh::loadStaticMesh("resources/models/Map/map.obj");
     createObjects();
+
+    // Audio setup
+    setupAudio();
 
     auto load_end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(load_end - load_start);
@@ -215,6 +220,21 @@ void BasicGame::createMagicSpots() {
     // TODO: possibly add near places where the puzzles should go as a clue
 }
 
+void BasicGame::setupAudio() {
+    if (!gl::AudioEngine::isReady()) {
+        gl::AudioEngine::initialize();
+    }
+    gl::AudioEngine::setMaxDistance(12.5f);
+
+    gl::AudioEngine::loadMusic("resources/audio/music.wav", "game_music", true);
+    gl::AudioEngine::setMusicVolume("game_music", 0.1f);
+
+    gl::AudioEngine::loadSound("resources/audio/grunt.wav", "guard_grunt");
+    gl::AudioEngine::loadSound("resources/audio/hey.wav", "guard_hey");
+    gl::AudioEngine::loadSound("resources/audio/step.wav", "step");
+    gl::AudioEngine::loadSound("resources/audio/magic_sparkle.wav", "magic_sparkle");
+}
+
 void BasicGame::draw() {
     if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -227,30 +247,24 @@ void BasicGame::draw() {
 
 
 void BasicGame::update(double delta_time) {
+    gl::AudioEngine::update(); // For audio updates
     if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
-
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
+
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
     screen.setCamPos(camera_system.getCameraPos()); // For screen changes
-
-    // Particles spawn over time
-    particle_timer += dt;
-    if (particle_timer > 0.75f) {
-        for (MagicVal v : magic_spots) {
-            particle_system.addMagicBurst(v.pos, v.float_down);
-        }
-        particle_timer = 0.0f;
-    }
+    updateMagicSpots(dt); // For particle updates
 
     // System updates
     if (screen.getType() != ScreenType::GUARD) {
         // When talking to guard, stop camera & player from moving
         character_system.updateWorld(world, dt);
         camera_system.updateWorld(world, dt);
+        gl::AudioEngine::setListener(cam->getPosition());
     }
     collision_system.updateWorld(world, dt);
     obj_system.updateWorld(world, dt);
@@ -265,6 +279,25 @@ void BasicGame::update(double delta_time) {
     if (found_gems == 3) {
         screen.setType(ScreenType::WIN);
         screen.draw();
+    }
+}
+
+void BasicGame::updateMagicSpots(float dt) {
+    // Particles spawn over time
+    particle_timer += dt;
+    if (particle_timer > 0.75f) {
+        for (MagicVal v : magic_spots) {
+            particle_system.addMagicBurst(v.pos, v.float_down);
+        }
+        particle_timer = 0.0f;
+    }
+
+    particle_audio_timer += dt;
+    if (particle_audio_timer > 1.0f) {
+        for (MagicVal& v : magic_spots) {
+            gl::AudioEngine::playSound3D("magic_sparkle", v.pos, 1.0f, 0.08f);
+        }
+        particle_audio_timer = 0.0f;
     }
 }
 

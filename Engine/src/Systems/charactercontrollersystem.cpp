@@ -1,6 +1,6 @@
 #include <Engine/Systems/charactercontrollersystem.h>
 #include <Engine/gameobject.h>
-#include <iostream>
+#include <Engine/Audio/audio-engine.h>
 
 void CharacterControllerSystem::setCamera(gl::Camera* cam) {
     m_cam = cam;
@@ -108,6 +108,18 @@ void CharacterControllerSystem::updateWorld(GameWorld& world, float dt) {
         curr_pos.y = height;
         velocity = 0.0f;
         on_ground = true;
+    }
+
+    // Walk audio
+    bool is_walking = glm::length(pos) > 0.0f && on_ground;
+    if (is_walking) {
+        footstep_timer += dt;
+        if (footstep_timer >= 0.5f) {
+            gl::AudioEngine::playSound("step", 0.15f);
+            footstep_timer = 0.0f;
+        }
+    } else {
+        footstep_timer = 0.5f;
     }
 
     old_pos = transform->pos;
