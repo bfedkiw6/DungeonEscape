@@ -11,7 +11,8 @@ enum class ScreenType {
     GAME,
     WIN,
     LOSE,
-    GUARD
+    GUARD,
+    DOOR
 };
 
 class Screen : public Game {
@@ -33,10 +34,13 @@ public:
     void setType(ScreenType type);
     bool switchScreen = false;
 
+    void setCamPos(glm::vec3 pos);
+
     void incrementGems();
     void resetGems();
 
-    void setCamPos(glm::vec3 pos);
+    bool shouldReset();
+    void clearShouldReset();
 
 private:
     void drawMainMenu();
@@ -44,7 +48,11 @@ private:
     void drawWinScreen();
     void drawLoseScreen();
     void drawGameScreen();
+
     void drawGuardDialogue();
+    void drawDoorDialogue();
+    void drawNearbyDialogue();
+
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
@@ -60,5 +68,6 @@ private:
     gl::DrawMaterial background_mat;
 
     int guard_dg_num = 0;
-    bool guard_dialogue = false;
+    int door_dg_num = 0;
+    bool should_reset;
 };

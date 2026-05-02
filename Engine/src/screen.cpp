@@ -40,8 +40,12 @@ void Screen::draw() {
     } else if (type_ == ScreenType::GUARD) {
         Window::hideMouse();
         drawGuardDialogue();
+    } else if (type_ == ScreenType::DOOR) {
+        Window::hideMouse();
+        drawDoorDialogue();
     } else {
         Window::hideMouse();
+        drawNearbyDialogue();
         drawGameScreen();
     }
 }
@@ -73,7 +77,8 @@ void Screen::keyEvent(int key, int action) {
                     switchScreen = true;
                     type_ = ScreenType::PAUSE;
                     Window::showMouse();
-                } else if (key == GLFW_KEY_T) {
+                }
+                else if (key == GLFW_KEY_T) {
                     // Player needs to be close enough to guard for dialogue to trigger
                     if (cam_pos.y == 0.75f && cam_pos.x < -12.0f && cam_pos.x > -16.0f
                         && cam_pos.z < 18.0f && cam_pos.z > 14.0f) {
@@ -82,13 +87,21 @@ void Screen::keyEvent(int key, int action) {
                         type_ = ScreenType::GUARD;
                         Window::hideMouse();
                     }
+                    // Door dialogue proximity
+                    else if (cam_pos.y == 0.75f && cam_pos.x < -12.0696f && cam_pos.x > -16.163f
+                        && cam_pos.z < 6.32462f && cam_pos.z > -1.02483f) {
+                        gl::AudioEngine::playSound("door", 0.6f);
+                        switchScreen = true;
+                        type_ = ScreenType::DOOR;
+                        Window::hideMouse();
+                    }
                 }
                 break;
             case ScreenType::WIN:
                 if (key == GLFW_KEY_ENTER) {
+                    should_reset = true;
                     switchScreen = true;
-                    type_ = ScreenType::GAME;
-                    Window::hideMouse();
+                    type_ = ScreenType::MAINMENU;
                 }
                 break;
             case ScreenType::LOSE:
@@ -112,6 +125,24 @@ void Screen::keyEvent(int key, int action) {
                     } else {
                         // Progress dialogue
                         guard_dg_num++;
+                    }
+                }
+                break;
+            case ScreenType::DOOR:
+                if (key == GLFW_KEY_ENTER) {
+                    if (gems_ == 3) {
+                        gl::AudioEngine::playSound("yay", 0.1f);
+                        gl::AudioEngine::playSound("applause", 0.4f);
+                        switchScreen = true;
+                        type_ = ScreenType::WIN;
+                    } else if (door_dg_num == 2) {
+                        door_dg_num = 0;
+                        switchScreen = true;
+                        type_ = ScreenType::GAME;
+                        Window::hideMouse();
+                    } else {
+                        // Progress dialogue
+                        door_dg_num++;
                     }
                 }
                 break;
@@ -202,14 +233,17 @@ void Screen::drawWinScreen() {
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
     gl::Graphics::drawText("YOU WIN!",
-                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
                            glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("You collected all the gems!",
-                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Thanks for playing :)",
-                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Press ENTER to play again!",
+                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
+                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
 }
 
 void Screen::drawLoseScreen() {
@@ -230,15 +264,6 @@ void Screen::drawGameScreen() {
                            glm::vec2(20.0f, 40.0f), 32.0f,
                            glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::LEFT);
 
-}
-
-void Screen::incrementGems() {
-    gems_++;
-}
-
-void Screen::resetGems() {
-    prev_gems_ = gems_;
-    gems_ = 0;
 }
 
 void Screen::drawGuardDialogue() {
@@ -267,6 +292,57 @@ void Screen::drawGuardDialogue() {
                            glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
 }
 
+void Screen::drawDoorDialogue() {
+    gl::Graphics::useTextShader();
+    glm::vec2 center = Window::getSize()/2.f;
+
+    if (gems_ != 3) {
+        if (door_dg_num == 0) {
+            gl::Graphics::drawText("Here's the door where I should enter in the gems.",
+                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+        } else if (door_dg_num == 1) {
+            gl::Graphics::drawText("I only have " + std::to_string(gems_) + " out of 3.",
+                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+        } else if (door_dg_num == 2) {
+            gl::Graphics::drawText("I should come back when I have found all of them.",
+                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+        }
+        gl::Graphics::drawText("Press ENTER to continue",
+                               glm::vec2(center.x, center.y - 280.0f), 25.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    } else {
+        gl::Graphics::drawText("I've found all the gems, we can escape!",
+                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+        gl::Graphics::drawText("Press ENTER to continue",
+                               glm::vec2(center.x, center.y - 280.0f), 25.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
+}
+
+void Screen::drawNearbyDialogue() {
+    gl::Graphics::useTextShader();
+    glm::vec2 center = Window::getSize()/2.f;
+
+    // Near guard
+    if (cam_pos.y == 0.75f && cam_pos.x < -12.0f && cam_pos.x > -16.0f
+        && cam_pos.z < 18.0f && cam_pos.z > 14.0f) {
+        gl::Graphics::drawText("Press T to interact",
+                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
+    // Near exit door
+    else if (cam_pos.y == 0.75f && cam_pos.x < -12.0696f && cam_pos.x > -16.163f
+               && cam_pos.z < 6.32462f && cam_pos.z > -1.02483f) {
+        gl::Graphics::drawText("Press T to interact",
+                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
+}
+
 void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat) {
     gl::Graphics::usePhongShader();
     gl::Graphics::setAmbientLight(glm::vec3(0.5f));
@@ -274,3 +350,19 @@ void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial 
     gl::Graphics::drawObject(shape, t, mat);
 }
 
+void Screen::incrementGems() {
+    gems_++;
+}
+
+void Screen::resetGems() {
+    prev_gems_ = gems_;
+    gems_ = 0;
+}
+
+bool Screen::shouldReset() {
+    return should_reset;
+}
+
+void Screen::clearShouldReset() {
+    should_reset = false;
+}

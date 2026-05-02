@@ -225,6 +225,7 @@ void BasicGame::setupAudio() {
         gl::AudioEngine::initialize();
     }
     gl::AudioEngine::setMaxDistance(12.5f);
+    gl::AudioEngine::setMasterVolume(1.0f);
 
     gl::AudioEngine::loadMusic("resources/audio/music.wav", "game_music", true);
     gl::AudioEngine::setMusicVolume("game_music", 0.1f);
@@ -233,10 +234,14 @@ void BasicGame::setupAudio() {
     gl::AudioEngine::loadSound("resources/audio/hey.wav", "guard_hey");
     gl::AudioEngine::loadSound("resources/audio/step.wav", "step");
     gl::AudioEngine::loadSound("resources/audio/magic_sparkle.wav", "magic_sparkle");
+    gl::AudioEngine::loadSound("resources/audio/yay.wav", "yay");
+    gl::AudioEngine::loadSound("resources/audio/applause.wav", "applause");
+    gl::AudioEngine::loadSound("resources/audio/door.wav", "door");
 }
 
 void BasicGame::draw() {
-    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
+    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD
+        && screen.getType() != ScreenType::DOOR) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
         screen.draw();
         return;
@@ -247,14 +252,30 @@ void BasicGame::draw() {
 
 
 void BasicGame::update(double delta_time) {
-    gl::AudioEngine::update(); // For audio updates
-    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD) {
+    // If game is being played from beginning
+    if (screen.shouldReset()) {
+        resetLevel();
+        screen.clearShouldReset();
+    }
+
+    // For audio updates
+    if (screen.getType() == ScreenType::WIN) {
+        gl::AudioEngine::pauseMusic("game_music");
+    } else if (screen.getType() == ScreenType::PAUSE) {
+        gl::AudioEngine::setMasterVolume(0.0f);
+    } else {
+        gl::AudioEngine::setMasterVolume(1.0f);
+        gl::AudioEngine::resumeMusic("game_music");
+    }
+    gl::AudioEngine::update();
+
+    if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD
+        && screen.getType() != ScreenType::DOOR) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
-
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
     screen.setCamPos(camera_system.getCameraPos()); // For screen changes
     updateMagicSpots(dt); // For particle updates
@@ -275,11 +296,6 @@ void BasicGame::update(double delta_time) {
     /*if (puzzle sucess) {
         screen.incrementGems();
     }*/
-    // TEMP: auto win when find all gems - probs change to u need to go put them in the door
-    if (found_gems == 3) {
-        screen.setType(ScreenType::WIN);
-        screen.draw();
-    }
 }
 
 void BasicGame::updateMagicSpots(float dt) {
@@ -295,7 +311,7 @@ void BasicGame::updateMagicSpots(float dt) {
     particle_audio_timer += dt;
     if (particle_audio_timer > 1.0f) {
         for (MagicVal& v : magic_spots) {
-            gl::AudioEngine::playSound3D("magic_sparkle", v.pos, 1.0f, 0.08f);
+            gl::AudioEngine::playSound3D("magic_sparkle", v.pos, 1.0f, 0.04f);
         }
         particle_audio_timer = 0.0f;
     }
@@ -303,27 +319,17 @@ void BasicGame::updateMagicSpots(float dt) {
 
 void BasicGame::resetLevel() {
     screen.resetGems();
-    clearObjects();
 
-    glm::vec3 player_pos = glm::vec3(0.0f, 0.0f, 0.0f);
-    player_obj->getTransformComp()->pos = glm::vec3(player_pos.x, player_pos.y, player_pos.z);
-    character_system.setHorizSpeed(0.0f);
     character_system.reset();
+    player_obj->getTransformComp()->pos = glm::vec3(11.5118f, 0.0f, 29.7553f);
+
     camera_system.reset();
-}
+    cam->setPosition(glm::vec3(0.0f, cam->getHeight(), 0.0f));
+    cam->setHorizAngle(200.0f);
+    cam->setVertAngle(-45.0f);
+    cam->setLook(cam->calcNewLook());
 
-void BasicGame::clearObjects() {
-    /*for (GameObject* log : placed_logs) {
-        draw_system.removeGameObject(log);
-        collision_system.removeGameObject(log);
-    }
-    placed_logs.clear();
-
-    for (GameObject* coin : placed_coins) {
-        draw_system.removeGameObject(coin);
-        collision_system.removeGameObject(coin);
-    }
-    placed_coins.clear();*/
+    particle_system.getParticles().clear();
 }
 
 void BasicGame::keyEvent(int key, int action) {
