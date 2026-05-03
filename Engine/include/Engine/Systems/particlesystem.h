@@ -34,7 +34,7 @@ public:
     int numParticles() const;
     void drawParticles() const;
     void moveParticles();
-    void addMagicBurst(glm::vec3 center, bool float_down);
+    void addMagicBurst(glm::vec3 center, bool float_down, int amount);
 
 private:
     std::vector<Particle> particles;

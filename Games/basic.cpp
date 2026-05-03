@@ -118,7 +118,6 @@ void BasicGame::createGuard() {
     animation_system.addGameObject(guard_obj);
 }
 
-
 void BasicGame::createMap() {
     map_obj = world.addGameObject();
     map_obj->type = ObjectType::MAP;
@@ -198,11 +197,15 @@ void BasicGame::createItemCollisions() {
 void BasicGame::createMagicSpots() {
     static std::mt19937 gen(std::random_device{}());
     std::uniform_real_distribution<float> height_fall(5.5f, 7.0f);
+    std::uniform_real_distribution<float> height_rise(-2.0f, 0.0f);
 
     // By the exit door
-    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 2.4627), true});
+    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 2.4627), true, 75, -1});
 
-    // TODO: possibly add near places where the puzzles should go as a clue
+    // Puzzle spots
+    magic_spots.push_back(MagicVal{glm::vec3(29.0, height_rise(gen), 28.4562), false, 10, 1});
+    magic_spots.push_back(MagicVal{glm::vec3(29.1, height_rise(gen), -21.8), false, 10, 2});
+    magic_spots.push_back(MagicVal{glm::vec3(34.0, height_rise(gen), 12.3194), false, 10, 3});
 }
 
 void BasicGame::setupAudio() {
@@ -288,7 +291,13 @@ void BasicGame::updateMagicSpots(float dt) {
     particle_timer += dt;
     if (particle_timer > 0.75f) {
         for (MagicVal v : magic_spots) {
-            particle_system.addMagicBurst(v.pos, v.float_down);
+            // Don't draw particles of completed puzzles
+            if ((v.puzzle_id == 1 && screen.getPuzzleBool(1)) ||
+                (v.puzzle_id == 2 && screen.getPuzzleBool(2)) ||
+                (v.puzzle_id == 3 && screen.getPuzzleBool(3))) {
+                continue;
+            }
+            particle_system.addMagicBurst(v.pos, v.float_down, v.amount);
         }
         particle_timer = 0.0f;
     }
@@ -296,6 +305,11 @@ void BasicGame::updateMagicSpots(float dt) {
     particle_audio_timer += dt;
     if (particle_audio_timer > 1.0f) {
         for (MagicVal& v : magic_spots) {
+            if ((v.puzzle_id == 1 && screen.getPuzzleBool(1)) ||
+                (v.puzzle_id == 2 && screen.getPuzzleBool(2)) ||
+                (v.puzzle_id == 3 && screen.getPuzzleBool(3))) {
+                continue;
+            }
             gl::AudioEngine::playSound3D("magic_sparkle", v.pos, 1.0f, 0.04f);
         }
         particle_audio_timer = 0.0f;

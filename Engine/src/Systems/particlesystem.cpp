@@ -39,7 +39,7 @@ void ParticleSystem::moveParticles() {
                         [](const Particle& p) { return p.lifetime <= 0; }), particles.end());
 }
 
-void ParticleSystem::addMagicBurst(glm::vec3 center, bool float_down) {
+void ParticleSystem::addMagicBurst(glm::vec3 center, bool float_down, int amount) {
     static std::mt19937 gen(std::random_device{}());
 
     std::uniform_real_distribution<float> dist_xz(-0.05f, 0.05f);
@@ -49,7 +49,7 @@ void ParticleSystem::addMagicBurst(glm::vec3 center, bool float_down) {
     std::uniform_int_distribution<int> color(0, 2);
     std::uniform_int_distribution<int> type(0, 1);
 
-    for (int i = 0; i < 75; i++) {
+    for (int i = 0; i < amount; i++) {
         Particle p;
         p.pos = center + glm::vec3(dist_xz(gen), dist_y(gen), dist_xz(gen));
 

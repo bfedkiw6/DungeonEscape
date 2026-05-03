@@ -48,6 +48,8 @@ private:
     struct MagicVal {
         glm::vec3 pos;
         bool float_down;
+        int amount;
+        int puzzle_id;
     };
     std::vector<MagicVal> magic_spots;
     float particle_timer = 4.0f;

@@ -12,7 +12,10 @@ enum class ScreenType {
     WIN,
     LOSE,
     GUARD,
-    DOOR
+    DOOR,
+    /*PUZZLE1,
+    PUZZLE2,
+    PUZZLE3*/
 };
 
 class Screen : public Game {
@@ -42,6 +45,9 @@ public:
     bool shouldReset();
     void clearShouldReset();
 
+    void setPuzzleBool(int puzzle_num, bool val);
+    bool getPuzzleBool(int puzzle_num);
+
 private:
     void drawMainMenu();
     void drawPauseScreen();
@@ -70,4 +76,8 @@ private:
     int guard_dg_num = 0;
     int door_dg_num = 0;
     bool should_reset;
+
+    bool puzzle1_done = false;
+    bool puzzle2_done = false;
+    bool puzzle3_done = false;
 };

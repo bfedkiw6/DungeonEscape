@@ -95,6 +95,25 @@ void Screen::keyEvent(int key, int action) {
                         type_ = ScreenType::DOOR;
                         Window::hideMouse();
                     }
+                    // TODO: add being near puzzles --> switch screen to appropiate puzzle
+                    /*else if (puzzle1_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.6f && cam_pos.x > 25.0971f
+                             && cam_pos.z < 30.6541f && cam_pos.z > 24.6f) {
+                        switchScreen = true;
+                        type_ = ScreenType::PUZZLE1;
+                        Window::showMouse();
+                    }
+                    else if (puzzle2_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.4851f && cam_pos.x > 24.5941f
+                             && cam_pos.z < -19.1622f && cam_pos.z > -25.5f) {
+                        switchScreen = true;
+                        type_ = ScreenType::PUZZLE2;
+                        Window::showMouse();
+                    }
+                    else if (puzzle3_done == false && cam_pos.y == 0.75f && cam_pos.x < 37.2276f && cam_pos.x > 32.9495f
+                             && cam_pos.z < 15.5551f && cam_pos.z > 8.86806f) {
+                        switchScreen = true;
+                        type_ = ScreenType::PUZZLE3;
+                        Window::showMouse();
+                    }*/
                 }
                 break;
             case ScreenType::WIN:
@@ -344,6 +363,27 @@ void Screen::drawNearbyDialogue() {
                                glm::vec2(center.x, center.y + 320), 32.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
+    // Near puzzle 1
+    else if (puzzle1_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.6f && cam_pos.x > 25.0971f
+             && cam_pos.z < 30.6541f && cam_pos.z > 24.6f) {
+        gl::Graphics::drawText("Press T to interact",
+                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
+    // Near puzzle 2
+    else if (puzzle2_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.4851f && cam_pos.x > 24.5941f
+             && cam_pos.z < -19.1622f && cam_pos.z > -25.5f) {
+        gl::Graphics::drawText("Press T to interact",
+                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
+    // Near puzzle 3
+    else if (puzzle3_done == false && cam_pos.y == 0.75f && cam_pos.x < 37.2276f && cam_pos.x > 32.9495f
+             && cam_pos.z < 15.5551f && cam_pos.z > 8.86806f) {
+        gl::Graphics::drawText("Press T to interact",
+                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
+    }
 }
 
 void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat) {
@@ -368,4 +408,25 @@ bool Screen::shouldReset() {
 
 void Screen::clearShouldReset() {
     should_reset = false;
+}
+
+void Screen::setPuzzleBool(int puzzle_num, bool val) {
+    if (puzzle_num == 1) {
+        puzzle1_done = val;
+    } else if (puzzle_num == 2) {
+        puzzle2_done = val;
+    } else if (puzzle_num == 3) {
+        puzzle3_done = val;
+    }
+}
+
+bool Screen::getPuzzleBool(int puzzle_num) {
+    if (puzzle_num == 1) {
+        return puzzle1_done;
+    } else if (puzzle_num == 2) {
+        return puzzle2_done;
+    } else if (puzzle_num == 3) {
+        return puzzle3_done;
+    }
+    return false;
 }
