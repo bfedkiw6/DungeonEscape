@@ -42,6 +42,8 @@ private:
 
     void createWalls();
     void getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales);
+    void createItemCollisions();
+    void getItemTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales, std::vector<CollisionShape>& shapes);
 
     struct MagicVal {
         glm::vec3 pos;

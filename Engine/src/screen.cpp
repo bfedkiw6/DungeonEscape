@@ -208,21 +208,24 @@ void Screen::drawPauseScreen() {
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
     gl::Graphics::drawText("Paused",
-                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 140.0f), 48.0f,
                            glm::vec3(0.561, 0.0f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("ESC = Resume Game",
-                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("MOUSE = Look Around",
-                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
                           glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("WASD = Move Around",
-                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("SPACE = Jump",
-                           glm::vec2(center.x, center.y + 160.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("T = Interact",
+                           glm::vec2(center.x, center.y + 160.0f), 48.0f,
+                           glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Press EQUAL for a hard reset",
                            glm::vec2(center.x, center.y + 220.0f), 48.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
 }

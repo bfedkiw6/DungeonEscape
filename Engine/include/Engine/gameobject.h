@@ -7,7 +7,8 @@
 enum class ObjectType {
     PLAYER,
     MAP,
-    WALLS
+    WALLS,
+    ITEMS
 };
 
 class GameObject

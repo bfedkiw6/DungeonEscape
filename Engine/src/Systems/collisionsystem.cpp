@@ -48,8 +48,12 @@ void CollisionSystem::updateWorld(GameWorld& world, float dt) {
             if (result.collision) {
                 collided = true;
                 collided_obj = obj->type;
-                // Nudge
-                p_transform->pos += result.normal * result.depth;
+                if (obj->type == ObjectType::ITEMS) {
+                    p_transform->pos = player_pos;
+                } else {
+                    // Nudge
+                    p_transform->pos += result.normal * result.depth;
+                }
             }
         }else if (obj_collision->shape == CollisionShape::BOX) {
             BoxCollider obj_col(obj_transform, obj_collision->height);
@@ -57,7 +61,7 @@ void CollisionSystem::updateWorld(GameWorld& world, float dt) {
             if (result.collision) {
                 collided = true;
                 collided_obj = obj->type;
-                if (obj->type == ObjectType::WALLS) {
+                if (obj->type == ObjectType::WALLS || obj->type == ObjectType::ITEMS) {
                     p_transform->pos = player_pos;
                 } else {
                     // Nudge

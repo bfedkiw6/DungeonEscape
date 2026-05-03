@@ -62,6 +62,7 @@ void BasicGame::createObjects() {
     createGuard();
     createMap();
     createWalls();
+    createItemCollisions();
     createMagicSpots();
 }
 
@@ -157,45 +158,41 @@ void BasicGame::createWalls() {
         wall->getCollisionComp()->shape = CollisionShape::BOX;
         wall->getCollisionComp()->radius = scales[i].z;
         wall->getCollisionComp()->height = scales[i].y;
-
         collision_system.addGameObject(wall);
     }
 }
 
-void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
-    positions.push_back(glm::vec3(-18.9354, 0.75, 20.0));
-    scales.push_back(glm::vec3(2.5, 6.0, 32.0));
+void BasicGame::createItemCollisions() {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> scales;
+    std::vector<CollisionShape> shapes;
+    int num_items = 17;
+    getItemTransforms(positions, scales, shapes);
 
-    positions.push_back(glm::vec3(7.0, 0.75, 33.854));
-    scales.push_back(glm::vec3(50.0, 6.0, 2.5));
+    /*gl::DrawShape* cube_shape = gl::Mesh::getLoadedShape("cube");
+    gl::DrawShape* sphere_shape = gl::Mesh::getLoadedShape("sphere");
+    gl::DrawShape* cylinder_shape = gl::Mesh::getLoadedShape("cylinder");*/
 
-    positions.push_back(glm::vec3(-5.0, 0.75, -4.74815));
-    scales.push_back(glm::vec3(30.0, 6.0, 2.5));
+    for (int i = 0; i < num_items; i++) {
+        GameObject* item = world.addGameObject();
+        item->type = ObjectType::ITEMS;
 
-    positions.push_back(glm::vec3(22.0, 0.75, -4.85759));
-    scales.push_back(glm::vec3(17.0, 6.0, 2.5));
+        /*item->addDrawableComp();
+        if (shapes[i] == CollisionShape::BOX) { item->getDrawableComp()->shape = cube_shape; }
+        if (shapes[i] == CollisionShape::SPHERE) { item->getDrawableComp()->shape = sphere_shape; }
+        if (shapes[i] == CollisionShape::CYLINDER) { item->getDrawableComp()->shape = cylinder_shape; }
+        draw_system.addGameObject(item);*/
 
-    positions.push_back(glm::vec3(31.3189, 0.75, 19.0));
-    scales.push_back(glm::vec3(2.5, 6.0, 30.0));
+        item->addTransformComp();
+        item->getTransformComp()->pos = positions[i];
+        item->getTransformComp()->scale = scales[i];
 
-    positions.push_back(glm::vec3(31.0641, 0.75, -16.4502));
-    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
-
-    positions.push_back(glm::vec3(-18.9354, 0.75, -16.0396));
-    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
-
-    positions.push_back(glm::vec3(25.0, 0.75, -31.0));
-    scales.push_back(glm::vec3(90.0, 6.0, 2.5));
-
-    positions.push_back(glm::vec3(64.7459, 0.75, -7.62769));
-    scales.push_back(glm::vec3(2.5, 6.0, 50.0));
-
-    positions.push_back(glm::vec3(47.0, 0.75, 17.1381));
-    scales.push_back(glm::vec3(34.0, 6.0, 2.5));
-
-    // Wall blocking exit door - delete when all gems found
-    positions.push_back(glm::vec3(-18.9354, 0.75, 2.25828));
-    scales.push_back(glm::vec3(2.5, 6.0, 5.0));
+        item->addCollisionComp();
+        item->getCollisionComp()->shape = shapes[i];
+        item->getCollisionComp()->radius = scales[i].z;
+        item->getCollisionComp()->height = scales[i].y;
+        collision_system.addGameObject(item);
+    }
 }
 
 void BasicGame::createMagicSpots() {
@@ -204,18 +201,6 @@ void BasicGame::createMagicSpots() {
 
     // By the exit door
     magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 2.4627), true});
-    /*magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), 6.1434), true});
-    magic_spots.push_back(MagicVal{glm::vec3(-17.9502, height_fall(gen), -1.30808), true});
-
-    // By lantern
-    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -14.02), false});
-    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -19.85), false});
-    magic_spots.push_back(MagicVal{glm::vec3(28.6281, -5.0, -16.61), false});
-
-    // By brooms
-    magic_spots.push_back(MagicVal{glm::vec3(59.2251, 6.0, -29.0077), true});
-    magic_spots.push_back(MagicVal{glm::vec3(61.2519, -5.0, -27.5818), false});
-    magic_spots.push_back(MagicVal{glm::vec3(62.8983, 6.0, -25.4046), true});*/
 
     // TODO: possibly add near places where the puzzles should go as a clue
 }
@@ -345,6 +330,12 @@ void BasicGame::keyEvent(int key, int action) {
             character_system.setKey(key, true);
         }
     }
+
+    // Hard reset
+    if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
+        resetLevel();
+        screen.setType(ScreenType::MAINMENU);
+    }
 }
 
 void BasicGame::mouseButtonEvent(int button, int action) {
@@ -379,4 +370,113 @@ void BasicGame::mouseScrolledEvent(double x_offset, double y_offset) {
 
 void BasicGame::resizeWindowEvent(int new_width, int new_height) {
     camera_system.resizeWindowEvent(new_width, new_height);
+}
+
+void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
+    positions.push_back(glm::vec3(-18.9354, 0.75, 20.0));
+    scales.push_back(glm::vec3(2.5, 6.0, 32.0));
+
+    positions.push_back(glm::vec3(7.0, 0.75, 33.854));
+    scales.push_back(glm::vec3(50.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(-5.0, 0.75, -4.74815));
+    scales.push_back(glm::vec3(30.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(22.0, 0.75, -4.85759));
+    scales.push_back(glm::vec3(17.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(31.3189, 0.75, 19.0));
+    scales.push_back(glm::vec3(2.5, 6.0, 30.0));
+
+    positions.push_back(glm::vec3(31.0641, 0.75, -16.4502));
+    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
+
+    positions.push_back(glm::vec3(-18.9354, 0.75, -16.0396));
+    scales.push_back(glm::vec3(2.5, 6.0, 34.0));
+
+    positions.push_back(glm::vec3(25.0, 0.75, -31.0));
+    scales.push_back(glm::vec3(90.0, 6.0, 2.5));
+
+    positions.push_back(glm::vec3(64.7459, 0.75, -7.62769));
+    scales.push_back(glm::vec3(2.5, 6.0, 50.0));
+
+    positions.push_back(glm::vec3(47.0, 0.75, 17.1381));
+    scales.push_back(glm::vec3(34.0, 6.0, 2.5));
+
+    // Wall blocking exit door - delete when all gems found
+    positions.push_back(glm::vec3(-18.9354, 0.75, 2.25828));
+    scales.push_back(glm::vec3(2.5, 6.0, 5.0));
+}
+
+void BasicGame::getItemTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales, std::vector<CollisionShape>& shapes) {
+    // Room 1
+    positions.push_back(glm::vec3(-16.5, 0.0, 16.0088));
+    scales.push_back(glm::vec3(2.8, 5.0, 16.0));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(23.6375, -0.5, -2.95818));
+    scales.push_back(glm::vec3(2.5, 4.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(29, -0.5, 30.6887));
+    scales.push_back(glm::vec3(2.8, 5.0, 7.0));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(26.5442, -0.5, 32.5));
+    scales.push_back(glm::vec3(2.8, 5.0, 2.8));
+    shapes.push_back(CollisionShape::BOX);
+
+    // Room 2
+    positions.push_back(glm::vec3(-15.0719, -0.5, -18.5623));
+    scales.push_back(glm::vec3(2.8, 5.0, 22));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(28.3, -0.5, -16.5));
+    scales.push_back(glm::vec3(2.5, 4.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(28.6, -0.5, -11.9822));
+    scales.push_back(glm::vec3(2.5, 2.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(28.6, -0.5, -21.9497));
+    scales.push_back(glm::vec3(2.5, 2.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    // Room 3
+    positions.push_back(glm::vec3(46.4576, -0.5, 14.4889));
+    scales.push_back(glm::vec3(2.5, 4.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(47.5262, -0.5, -29.1309));
+    scales.push_back(glm::vec3(2.5, 4.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(62.1068, -0.5, 4.03312));
+    scales.push_back(glm::vec3(2.5, 2.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(61.9865, -0.5, 0.843284));
+    scales.push_back(glm::vec3(2.5, 2.0, 2.5));
+    shapes.push_back(CollisionShape::CYLINDER);
+
+    positions.push_back(glm::vec3(32.8796, -1.0, 12.1806));
+    scales.push_back(glm::vec3(2.5, 4.0, 8.0));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(33.2749, -0.5, -27.8144));
+    scales.push_back(glm::vec3(2.5, 4.0, 5.0));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(34.8536, -0.5, -28.71));
+    scales.push_back(glm::vec3(2.5, 2.0, 2.5));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(60.2093, -0.5, -28.6333));
+    scales.push_back(glm::vec3(6.0, 4.0, 1.5));
+    shapes.push_back(CollisionShape::BOX);
+
+    positions.push_back(glm::vec3(62.9548, -0.5, -24.8316));
+    scales.push_back(glm::vec3(1.5, 4.0, 4.0));
+    shapes.push_back(CollisionShape::BOX);
 }
