@@ -7,10 +7,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-// struct Rect {
-//     float x, y, w, h;
-// };
-
 Screen::Screen() {
     cam = std::make_unique<gl::Camera>();
     cam->setPosition(glm::vec3(0.0f, cam->getHeight(), 0.0f));
@@ -23,8 +19,6 @@ Screen::Screen() {
 
     initPuzzleGrid();
     initWordPuzzle();
-
-    //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
 }
 
 void Screen::setCamPos(glm::vec3 pos) {
@@ -59,7 +53,6 @@ void Screen::draw() {
         drawWordPuzzle();
     } else {
         Window::hideMouse();
-        //std::cout << "draw game\n";
         drawNearbyDialogue();
         drawGameScreen();
     }
@@ -183,8 +176,8 @@ void Screen::keyEvent(int key, int action) {
                 }
                 break;
             case ScreenType::PUZZLE1:
-                if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-                    initPuzzleGrid(); // reset puzzle
+                if (key == GLFW_KEY_R && action == GLFW_PRESS && !puzzle1_done) {
+                    initPuzzleGrid(); // Reset puzzle
                     return;
                 }
 
@@ -232,19 +225,14 @@ void Screen::toggleCell(int i, int j) {
 }
 
 void Screen::mouseButtonEvent(int button, int action) {
-    //if (type_ != ScreenType::PUZZLE1) return;
-
     if(type_ == ScreenType::PUZZLE1){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
-
             const int N = 5;
 
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
-
                     Rect r = grid[i][j];
 
                     if (mx >= r.x && mx <= r.x + r.w &&
@@ -266,34 +254,36 @@ void Screen::mouseButtonEvent(int button, int action) {
             }
         }
     }
-
-    if(type_ == ScreenType::PUZZLE2){
+    if (type_ == ScreenType::PUZZLE2){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
-
             const int N = 11;
 
             for (int i = 0; i < N; i++) {
-
+                if (letterUsed[i]) continue;
                 Rect r = letterRects[i];
 
-                if (mx >= r.x && mx <= r.x + r.w &&
-                    my <= r.y && my >= r.y - r.h) {
-
+                if (mx >= r.x && mx <= r.x + r.w && my <= r.y && my >= r.y - r.h) {
                     currentWord += letterGrid[i];
+                    letterUsed[i] = true;
 
                     //WIN CHECK
                     if (currentWord == targetWord) {
                         wordPuzzleWon = true;
+                        incrementGems();
+                        puzzle2_done = true;
+                        gl::AudioEngine::playSound("yay", 0.3f);
+                        return;
                     }
-
                     //AUTO RESET CONDITION
-                    if (currentWord.length() >= targetWord.length()) {
+                    if (!wordPuzzleWon && currentWord.length() >= targetWord.length()) {
                         currentWord = "";
+                        for (int j = 0; j < N; j++) {
+                            letterUsed[j] = false;
+                        }
+                        gl::AudioEngine::playSound("boo", 0.6f);
                     }
-
                     return;
                 }
             }
@@ -311,8 +301,12 @@ void Screen::mouseScrolledEvent(double x_offset, double y_offset) {
 }
 
 void Screen::resizeWindowEvent(int new_width, int new_height) {
-    initPuzzleGrid();
-    initWordPuzzle();
+    if (!puzzle1_done) {
+        initPuzzleGrid();
+    }
+    if (!puzzle2_done) {
+        initWordPuzzle();
+    }
 }
 
 ScreenType Screen::getType() {
@@ -525,11 +519,10 @@ void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial 
 
 void Screen::initPuzzleGrid() {
     glm::vec2 size = Window::getSize();
-
     const int N = 5;
 
-    float cellW = 120.0f;
-    float cellH = 120.0f;
+    float cellW = 100.0f;
+    float cellH = 100.0f;
     float spacing = 20.0f;
 
     float totalW = N * cellW + (N - 1) * spacing;
@@ -577,8 +570,9 @@ bool Screen::checkWin1() {
 }
 
 void Screen::drawPuzzle1() {
+    glClearColor(1.0f, 0.914f, 0.733f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec2 size = Window::getSize();
-
     gl::Graphics::useTextShader();
 
     // draw grid squares
@@ -589,73 +583,66 @@ void Screen::drawPuzzle1() {
 
             std::string label = puzzle_grid[i][j] ? "ON" : "OFF";
 
-            gl::Graphics::drawText(
-                label,
-                glm::vec2(r.x + r.w/2, r.y - r.h/2),
-                32.0f,
-                puzzle_grid[i][j] ? glm::vec3(0.2f, 1.0f, 0.2f)
-                                  : glm::vec3(1.0f, 1.0f, 1.0f),
-                gl::TextAlign::CENTER
-                );
+            gl::Graphics::drawText(label,
+                                   glm::vec2(r.x + r.w/2, r.y - r.h/2), 32.0f,
+                                   puzzle_grid[i][j] ? glm::vec3(0.0f, 1.0f, 0.0f)
+                                                     : glm::vec3(0.0f, 0.0f, 0.0f),
+                                   gl::TextAlign::CENTER);
         }
     }
-
     // bottom message
     bool won = checkWin1();
-
     std::string msg;
-
     if (won) {
-        incrementGems();
-        setPuzzleBool(1,true);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if (!puzzle1_done) {
+            incrementGems();
+            puzzle1_done = true;
+            gl::AudioEngine::playSound("yay", 0.3f);
+        }
         msg = "YOU WON A GEM!";
     }
-    // else if (last_clicked_row != -1) {
-    //     msg = "Clicked: (" +
-    //           std::to_string(last_clicked_row) + "," +
-    //           std::to_string(last_clicked_col) + ")";
-    // }
     else {
         msg = "Turn off the lights!";
     }
-    gl::Graphics::drawText(
-        msg,
-        glm::vec2(size.x / 2, 100.0f),
-        40.0f,
-        won ? glm::vec3(0.2f, 1.0f, 0.2f)
-            : glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
+    gl::Graphics::drawText(msg,
+                           glm::vec2(size.x / 2, 60.0f), 40.0f,
+                           won ? glm::vec3(0.2f, 1.0f, 0.2f)
+                               : glm::vec3(0.635f, 0.0f, 0.749f),
+                           gl::TextAlign::CENTER);
 
-    //glm::vec2 size = Window::getSize();
+    if (!puzzle1_done) {
+        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, size.y - 50.0f), 28.0f,
+                               glm::vec3(0.635f, 0.0f, 0.749f),
+                               gl::TextAlign::CENTER);
+    } else {
+        gl::Graphics::drawText("ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, size.y - 80.0f), 28.0f,
+                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
+    }
 
-    gl::Graphics::drawText(
-        "R = Restart   |   ESC = Exit Puzzle",
-        glm::vec2(size.x / 2, gridBottomY - 120.0f),
-        28.0f,
-        glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
 }
 
 void Screen::initWordPuzzle() {
     glm::vec2 size = Window::getSize();
-
     float cellW = 100.0f;
     float cellH = 100.0f;
     float spacing = 15.0f;
 
-    const int N = 7;
+    const int N = 11;
 
     float totalW = N * cellW + (N - 1) * spacing;
 
     float startX = (size.x - totalW) / 2.0f;
     float startY = size.y / 2.0f;
 
-    std::string scrambled = "TNCEHAM"; //scramble
+    std::string scrambled = "TNCEHAMTNEN";
 
     for (int i = 0; i < N; i++) {
         letterGrid[i] = scrambled[i];
+        letterUsed[i] = false;
 
         letterRects[i] = {
             startX + i * (cellW + spacing),
@@ -670,55 +657,39 @@ void Screen::initWordPuzzle() {
 }
 
 void Screen::drawWordPuzzle() {
-
+    glClearColor(1.0f, 0.914f, 0.733f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec2 size = Window::getSize();
-
     gl::Graphics::useTextShader();
-
     const int N = 11;
 
-    // draw letters
+    // Draw letters
     for (int i = 0; i < N; i++) {
-
+        if (letterUsed[i]) continue;
         Rect r = letterRects[i];
 
         std::string s(1, letterGrid[i]);
 
-        gl::Graphics::drawText(
-            s,
-            glm::vec2(r.x + r.w/2, r.y - r.h/2),
-            40.0f,
-            glm::vec3(1.0f),
-            gl::TextAlign::CENTER
-            );
+        gl::Graphics::drawText(s,
+                               glm::vec2(r.x + r.w/2, r.y - r.h/2), 40.0f,
+                               glm::vec3(0.0f), gl::TextAlign::CENTER);
     }
 
-    // progress display
+    // Progress display
     std::string msg;
-
     if (wordPuzzleWon) {
-        incrementGems();
-        setPuzzleBool(2,true);
         msg = "YOU WON A GEM!";
     } else {
-        msg = "Assemble Word: " + currentWord;
+        msg = "Unscramble letters: " + currentWord;
     }
-    gl::Graphics::drawText(
-        "ESC = Exit Puzzle",
-        glm::vec2(size.x / 2, gridBottomY - 120.0f),
-        28.0f,
-        glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
+    gl::Graphics::drawText("ESC = Exit Puzzle",
+                           glm::vec2(size.x / 2, size.y - 80.0f), 28.0f,
+                           glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
 
-    gl::Graphics::drawText(
-        msg,
-        glm::vec2(size.x / 2, 120.0f),
-        36.0f,
-        wordPuzzleWon ? glm::vec3(0.2f, 1.0f, 0.2f)
-                      : glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
+    gl::Graphics::drawText(msg,
+                           glm::vec2(size.x / 2, 120.0f), 36.0f,
+                           wordPuzzleWon ? glm::vec3(0.0f, 0.549f, 0.024f) : glm::vec3(0.0f, 0.0f, 1.0f),
+                           gl::TextAlign::CENTER);
 }
 
 void Screen::initColorPuzzle() {
@@ -781,14 +752,14 @@ void Screen::clearShouldReset() {
     should_reset = false;
 }
 
-void Screen::setPuzzleBool(int puzzle_num, bool val) {
-    if (puzzle_num == 1) {
-        puzzle1_done = val;
-    } else if (puzzle_num == 2) {
-        puzzle2_done = val;
-    } else if (puzzle_num == 3) {
-        puzzle3_done = val;
-    }
+void Screen::resetPuzzles() {
+    puzzle1_done = false;
+    puzzle2_done = false;
+    puzzle3_done = false;
+
+    initPuzzleGrid();
+    initWordPuzzle();
+    initColorPuzzle();
 }
 
 bool Screen::getPuzzleBool(int puzzle_num) {

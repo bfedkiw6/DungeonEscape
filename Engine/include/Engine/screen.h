@@ -45,7 +45,7 @@ public:
     bool shouldReset();
     void clearShouldReset();
 
-    void setPuzzleBool(int puzzle_num, bool val);
+    void resetPuzzles();
     bool getPuzzleBool(int puzzle_num);
 
     void setMousePos(glm::vec2 pos);
@@ -66,15 +66,6 @@ private:
     void drawDoorDialogue();
     void drawNearbyDialogue();
 
-    void initPuzzleGrid();
-    void drawPuzzle1();
-    void toggleCell(int i, int j);
-    bool checkWin1();
-
-    void initWordPuzzle();
-    void drawWordPuzzle();
-    void initColorPuzzle();
-
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
@@ -86,24 +77,30 @@ private:
 
     Transform tb, tf;
     gl::DrawShape* background;
-    gl::DrawMesh* skull_mesh;
     gl::DrawMaterial background_mat;
 
     int guard_dg_num = 0;
     int door_dg_num = 0;
     bool should_reset;
 
-    bool puzzle1_done = false;
-    bool puzzle2_done = false;
-    bool puzzle3_done = false;
+    glm::vec2 mouse_pos;
+    float gridBottomY;
 
+    // Puzzle 1
+    bool puzzle1_done = false;
+    void initPuzzleGrid();
+    void drawPuzzle1();
+    void toggleCell(int i, int j);
+    bool checkWin1();
 
     bool puzzle_grid[5][5] = { false };
     int last_clicked_row = -1;
     int last_clicked_col = -1;
 
-    glm::vec2 mouse_pos;
-    float gridBottomY;
+    // Puzzle 2
+    bool puzzle2_done = false;
+    void initWordPuzzle();
+    void drawWordPuzzle();
 
     std::string targetWord = "ENCHANTMENT";
     std::string currentWord = "";
@@ -111,6 +108,11 @@ private:
 
     char letterGrid[12];
     Rect letterRects[12];
+    bool letterUsed[12];
+
+    // Puzzle 3
+    bool puzzle3_done = false;
+    void initColorPuzzle();
 
     glm::vec3 currentColor = glm::vec3(0.0f);
     glm::vec3 targetColor  = glm::vec3(1.0f, 0.0f, 1.0f); //purple
