@@ -66,16 +66,6 @@ private:
     void drawDoorDialogue();
     void drawNearbyDialogue();
 
-    void initPuzzleGrid();
-    void drawPuzzle1();
-    void toggleCell(int i, int j);
-    bool checkWin1();
-
-    void initWordPuzzle();
-    void drawWordPuzzle();
-    void initPotionPuzzle();
-    void drawPotionPuzzle();
-
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
@@ -122,7 +112,8 @@ private:
 
     // Puzzle 3
     bool puzzle3_done = false;
-    void initColorPuzzle();
+    void initPotionPuzzle();
+    void drawPotionPuzzle();
 
     glm::vec3 currentColor = glm::vec3(0.0f);
     glm::vec3 targetColor  = glm::vec3(1.0f, 0.0f, 1.0f); //purple

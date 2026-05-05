@@ -55,7 +55,7 @@ void Screen::draw() {
     } else if (type_ == ScreenType::PUZZLE2) {
         Window::showMouse();
         drawWordPuzzle();
-    } else if (type_ == ScreenType::PUZZLE2) {
+    } else if (type_ == ScreenType::PUZZLE3) {
         Window::showMouse();
         drawPotionPuzzle();
     } else {
@@ -205,7 +205,7 @@ void Screen::keyEvent(int key, int action) {
                 }
                 break;
             case ScreenType::PUZZLE3:
-                if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+                if (key == GLFW_KEY_R && action == GLFW_PRESS && !puzzle3_done) {
                     initPotionPuzzle(); // reset puzzle
                     return;
                 }
@@ -245,7 +245,7 @@ void Screen::toggleCell(int i, int j) {
 }
 
 void Screen::mouseButtonEvent(int button, int action) {
-    if(type_ == ScreenType::PUZZLE1){
+    if (type_ == ScreenType::PUZZLE1){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
@@ -310,16 +310,12 @@ void Screen::mouseButtonEvent(int button, int action) {
         }
     }
 
-    if(type_ == ScreenType::PUZZLE3){
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-
-            glm::vec2 size = Window::getSize();
-
+    if (type_ == ScreenType::PUZZLE3){
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !puzzle3_done) {
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
 
             const int N = 3;
-
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
 
@@ -378,23 +374,26 @@ void Screen::drawMainMenu() {
     gl::Graphics::useTextShader();
     glm::vec2 size = Window::getSize();
     glm::vec2 center = size/2.f;
+    gl::Graphics::drawText("Put Game Name Here",
+                           glm::vec2(center.x, center.y - 280.0f), 100.0f,
+                           glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER, "magic");
     gl::Graphics::drawText("You've woken up in a wizard's dungeon with",
-                           glm::vec2(center.x, center.y - 200.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 100.0f), 70.0f,
                            glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("no memory. Explore your surroundings,",
-                           glm::vec2(center.x, center.y - 140.0f), 48.0f,
+                           glm::vec2(center.x, center.y - 30.0f), 70.0f,
                            glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("maybe there is some way out...",
-                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 40.0f), 70.0f,
                            glm::vec3(0.322f, 0.784f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press ENTER to play",
-                           glm::vec2(center.x, center.y + 140.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 220.0f), 60.0f,
                            glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press T to interact",
-                           glm::vec2(center.x, center.y + 200.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 280.0f), 60.0f,
                            glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press ESC to pause & see controls",
-                           glm::vec2(center.x, center.y + 260.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 340.0f), 60.0f,
                            glm::vec3(0.68f, 0.957f, 1.0f), gl::TextAlign::CENTER);
 }
 
@@ -405,25 +404,25 @@ void Screen::drawPauseScreen() {
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
     gl::Graphics::drawText("Paused",
-                           glm::vec2(center.x, center.y - 140.0f), 48.0f,
-                           glm::vec3(0.561, 0.0f, 1.0f), gl::TextAlign::CENTER);
+                           glm::vec2(center.x, center.y - 140.0f), 100.0f,
+                           glm::vec3(0.678f, 0.42f, 0.988f), gl::TextAlign::CENTER, "magic");
     gl::Graphics::drawText("ESC = Resume Game",
-                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 40.0f), 70.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("MOUSE = Look Around",
-                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 110.0f), 70.0f,
                           glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("WASD = Move Around",
-                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 180.0f), 70.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("SPACE = Jump",
-                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 250.0f), 70.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("T = Interact",
-                           glm::vec2(center.x, center.y + 160.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 320.0f), 70.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Press EQUAL for a hard reset",
-                           glm::vec2(center.x, center.y + 220.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 390.0f), 70.0f,
                            glm::vec3(1.0f, 0.541f, 0.953f), gl::TextAlign::CENTER);
 }
 
@@ -432,18 +431,21 @@ void Screen::drawWinScreen() {
     // Text
     gl::Graphics::useTextShader();
     glm::vec2 center = Window::getSize()/2.f;
-    gl::Graphics::drawText("YOU WIN!",
-                           glm::vec2(center.x, center.y - 80.0f), 48.0f,
-                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("You collected all the gems!",
-                           glm::vec2(center.x, center.y - 20.0f), 48.0f,
+    gl::Graphics::drawText("Game by Briana Fedkiw & Veronika Grytsai",
+                           glm::vec2(center.x, center.y - 400.0f), 60.0f,
+                           glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Winner Winner!",
+                           glm::vec2(center.x, center.y - 80.0f), 100.0f,
+                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER, "magic");
+    gl::Graphics::drawText("You collected all the gems like a true escapist",
+                           glm::vec2(center.x, center.y + 20.0f), 90.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
     gl::Graphics::drawText("Thanks for playing :)",
-                           glm::vec2(center.x, center.y + 40.0f), 48.0f,
+                           glm::vec2(center.x, center.y + 120.0f), 90.0f,
                            glm::vec3(0.561f, 1.0f, 0.651f), gl::TextAlign::CENTER);
-    gl::Graphics::drawText("Press ENTER to play again!",
-                           glm::vec2(center.x, center.y + 100.0f), 48.0f,
-                           glm::vec3(0.188f, 0.749f, 0.278f), gl::TextAlign::CENTER);
+    gl::Graphics::drawText("Press ENTER to play again",
+                           glm::vec2(center.x, center.y + 400.0f), 50.0f,
+                           glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER, "magic");
 }
 
 void Screen::drawLoseScreen() {
@@ -461,7 +463,7 @@ void Screen::drawLoseScreen() {
 void Screen::drawGameScreen() {
     gl::Graphics::useTextShader();
     gl::Graphics::drawText("Gems Collected: " + std::to_string(gems_),
-                           glm::vec2(20.0f, 40.0f), 32.0f,
+                           glm::vec2(20.0f, 60.0f), 60.0f,
                            glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::LEFT);
 
 }
@@ -472,23 +474,23 @@ void Screen::drawGuardDialogue() {
 
     if (guard_dg_num == 0) {
         gl::Graphics::drawText("HEY YOU! I've seemed to misplaced the door key.",
-                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 1) {
         gl::Graphics::drawText("Go collect the three magic gems around the dungeon so we can be free.",
-                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 2) {
         gl::Graphics::drawText("The gems are guarded by puzzles hidden around.",
-                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     } else if (guard_dg_num == 3) {
         gl::Graphics::drawText("The magic particles may point you in the right direction!",
-                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
     }
     gl::Graphics::drawText("Press ENTER to continue",
-                           glm::vec2(center.x, center.y - 280.0f), 25.0f,
+                           glm::vec2(center.x, center.y - 260.0f), 50.0f,
                            glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
 }
 
@@ -499,26 +501,26 @@ void Screen::drawDoorDialogue() {
     if (gems_ != 3) {
         if (door_dg_num == 0) {
             gl::Graphics::drawText("Here's the door where I should enter in the gems.",
-                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                    glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
         } else if (door_dg_num == 1) {
             gl::Graphics::drawText("I only have " + std::to_string(gems_) + " out of 3.",
-                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                    glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
         } else if (door_dg_num == 2) {
             gl::Graphics::drawText("I should come back when I have found all of them.",
-                                   glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                                   glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                    glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
         }
         gl::Graphics::drawText("Press ENTER to continue",
-                               glm::vec2(center.x, center.y - 280.0f), 25.0f,
+                               glm::vec2(center.x, center.y - 260.0f), 50.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     } else {
         gl::Graphics::drawText("I've found all the gems, we can escape!",
-                               glm::vec2(center.x, center.y - 320.0f), 30.0f,
+                               glm::vec2(center.x, center.y - 320.0f), 60.0f,
                                glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER);
         gl::Graphics::drawText("Press ENTER to continue",
-                               glm::vec2(center.x, center.y - 280.0f), 25.0f,
+                               glm::vec2(center.x, center.y - 260.0f), 50.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
 }
@@ -531,35 +533,35 @@ void Screen::drawNearbyDialogue() {
     if (cam_pos.y == 0.75f && cam_pos.x < -12.0f && cam_pos.x > -16.0f
         && cam_pos.z < 18.0f && cam_pos.z > 14.0f) {
         gl::Graphics::drawText("Press T to interact",
-                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec2(center.x, center.y + 320), 60.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
     // Near exit door
     else if (cam_pos.y == 0.75f && cam_pos.x < -12.0696f && cam_pos.x > -16.163f
                && cam_pos.z < 6.32462f && cam_pos.z > -1.02483f) {
         gl::Graphics::drawText("Press T to interact",
-                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec2(center.x, center.y + 320), 60.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
     // Near puzzle 1
     else if (puzzle1_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.6f && cam_pos.x > 25.0971f
              && cam_pos.z < 30.6541f && cam_pos.z > 24.6f) {
         gl::Graphics::drawText("Press T to interact",
-                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec2(center.x, center.y + 320), 60.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
     // Near puzzle 2
     else if (puzzle2_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.4851f && cam_pos.x > 24.5941f
              && cam_pos.z < -19.1622f && cam_pos.z > -25.5f) {
         gl::Graphics::drawText("Press T to interact",
-                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec2(center.x, center.y + 320), 60.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
     // Near puzzle 3
     else if (puzzle3_done == false && cam_pos.y == 0.75f && cam_pos.x < 37.2276f && cam_pos.x > 32.9495f
              && cam_pos.z < 15.5551f && cam_pos.z > 8.86806f) {
         gl::Graphics::drawText("Press T to interact",
-                               glm::vec2(center.x, center.y + 320), 32.0f,
+                               glm::vec2(center.x, center.y + 320), 60.0f,
                                glm::vec3(1.0f, 0.416f, 0.416f), gl::TextAlign::CENTER);
     }
 }
@@ -577,7 +579,7 @@ void Screen::initPuzzleGrid() {
 
     float cellW = 100.0f;
     float cellH = 100.0f;
-    float spacing = 20.0f;
+    float spacing = 60.0f;
 
     float totalW = N * cellW + (N - 1) * spacing;
     float totalH = N * cellH + (N - 1) * spacing;
@@ -624,7 +626,7 @@ bool Screen::checkWin1() {
 }
 
 void Screen::drawPuzzle1() {
-    glClearColor(1.0f, 0.914f, 0.733f, 1.0f);
+    glClearColor(0.569f, 0.467f, 0.322f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec2 size = Window::getSize();
     gl::Graphics::useTextShader();
@@ -632,13 +634,12 @@ void Screen::drawPuzzle1() {
     // draw grid squares
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
-
             Rect r = grid[i][j];
 
             std::string label = puzzle_grid[i][j] ? "ON" : "OFF";
 
             gl::Graphics::drawText(label,
-                                   glm::vec2(r.x + r.w/2, r.y - r.h/2), 32.0f,
+                                   glm::vec2(r.x + r.w/2, r.y - r.h/2), 50.0f,
                                    puzzle_grid[i][j] ? glm::vec3(0.0f, 1.0f, 0.0f)
                                                      : glm::vec3(0.0f, 0.0f, 0.0f),
                                    gl::TextAlign::CENTER);
@@ -655,28 +656,24 @@ void Screen::drawPuzzle1() {
             puzzle1_done = true;
             gl::AudioEngine::playSound("yay", 0.3f);
         }
-        msg = "YOU WON A GEM!";
-    }
-    else {
-        msg = "Turn off the lights!";
-    }
-    gl::Graphics::drawText(msg,
-                           glm::vec2(size.x / 2, 60.0f), 40.0f,
-                           won ? glm::vec3(0.2f, 1.0f, 0.2f)
-                               : glm::vec3(0.635f, 0.0f, 0.749f),
-                           gl::TextAlign::CENTER);
-
-    if (!puzzle1_done) {
-        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
-                               glm::vec2(size.x / 2, size.y - 50.0f), 28.0f,
-                               glm::vec3(0.635f, 0.0f, 0.749f),
-                               gl::TextAlign::CENTER);
-    } else {
+        gl::Graphics::drawText("You won a gem!",
+                               glm::vec2(size.x / 2, size.y / 2), 100.0f,
+                               glm::vec3(0.0f, 1.0f, 0.0f),
+                               gl::TextAlign::CENTER, "magic");
         gl::Graphics::drawText("ESC = Exit Puzzle",
-                               glm::vec2(size.x / 2, size.y - 80.0f), 28.0f,
+                               glm::vec2(size.x / 2, (size.y / 2) + 120.0f), 70.0f,
                                glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
     }
-
+    else {
+        gl::Graphics::drawText("Turn off the lights!",
+                               glm::vec2(size.x / 2, (size.y / 2) - 440.0f), 80.0f,
+                               glm::vec3(0.384f, 0.0f, 0.49f),
+                               gl::TextAlign::CENTER, "magic");
+        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, size.y - 50.0f), 60.0f,
+                               glm::vec3(0.384f, 0.0f, 0.49f),
+                               gl::TextAlign::CENTER);
+    }
 }
 
 void Screen::initWordPuzzle() {
@@ -725,42 +722,51 @@ void Screen::drawWordPuzzle() {
         std::string s(1, letterGrid[i]);
 
         gl::Graphics::drawText(s,
-                               glm::vec2(r.x + r.w/2, r.y - r.h/2), 40.0f,
+                               glm::vec2(r.x + r.w/2, r.y - r.h/2), 60.0f,
                                glm::vec3(0.0f), gl::TextAlign::CENTER);
     }
 
     // Progress display
     std::string msg;
     if (wordPuzzleWon) {
-        msg = "YOU WON A GEM!";
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl::Graphics::drawText("You won a gem!",
+                               glm::vec2(size.x / 2, size.y / 2), 100.0f,
+                               glm::vec3(0.0f, 1.0f, 0.0f),
+                               gl::TextAlign::CENTER, "magic");
+        gl::Graphics::drawText("ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, (size.y / 2) + 120.0f), 70.0f,
+                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
     } else {
-        msg = "Unscramble letters: " + currentWord;
+        gl::Graphics::drawText("Unscramble letters: " + currentWord,
+                               glm::vec2(size.x / 2, (size.y / 2) - 300.0f), 80.0f,
+                               glm::vec3(0.0f, 0.0f, 1.0f),
+                               gl::TextAlign::CENTER, "magic");
+        gl::Graphics::drawText("Click the above letters in the right order",
+                               glm::vec2(size.x / 2, (size.y / 2) + 180.0f), 70.0f,
+                               glm::vec3(0.0f, 0.0f, 1.0f),
+                               gl::TextAlign::CENTER);
+        gl::Graphics::drawText("ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, size.y - 80.0f), 60.0f,
+                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
     }
-    gl::Graphics::drawText("ESC = Exit Puzzle",
-                           glm::vec2(size.x / 2, size.y - 80.0f), 28.0f,
-                           glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
 
-    gl::Graphics::drawText(msg,
-                           glm::vec2(size.x / 2, 120.0f), 36.0f,
-                           wordPuzzleWon ? glm::vec3(0.0f, 0.549f, 0.024f) : glm::vec3(0.0f, 0.0f, 1.0f),
-                           gl::TextAlign::CENTER);
 }
 
 void Screen::initPotionPuzzle() {
-
     const int N = 3;
-
     glm::vec2 size = Window::getSize();
 
     float cellW = 220.0f;
     float cellH = 60.0f;
-    float spacing = 20.0f;
+    float spacing = 50.0f;
 
     float totalW = N * cellW + (N - 1) * spacing;
     float totalH = N * cellH + (N - 1) * spacing;
 
     float startX = (size.x - totalW) / 2.0f;
-    float startY = (size.y + totalH) / 2.0f;
+    float startY = (size.y + totalH) / 2.0f + 100.0f;
 
     std::string names[N][N] = {
         {"Unicorn Horn", "Dragon Scale", "Mandrake"},
@@ -776,7 +782,6 @@ void Screen::initPotionPuzzle() {
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-
             ingredientRects[i][j] = {
                 startX + j * (cellW + spacing),
                 startY - i * (cellH + spacing),
@@ -797,51 +802,35 @@ void Screen::initPotionPuzzle() {
 }
 
 void Screen::drawPotionPuzzle() {
+    glClearColor(0.18f, 0.18f, 0.18f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec2 size = Window::getSize();
-
     gl::Graphics::useTextShader();
-
     const int N = 3;
 
     // GRID
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-
             Rect r = ingredientRects[i][j];
-
             glm::vec3 col = selected[i][j]
                                 ? glm::vec3(1.0f)
                                 : ingredientColors[i][j];
-
-            gl::Graphics::drawText(
-                ingredientNames[i][j],
-                glm::vec2(r.x + r.w/2, r.y - r.h/2),
-                28.0f,
-                col,
-                gl::TextAlign::CENTER
-                );
+            gl::Graphics::drawText(ingredientNames[i][j],
+                                   glm::vec2(r.x + r.w/2, r.y - r.h/2), 50.0f,
+                                   col,
+                                   gl::TextAlign::CENTER);
         }
     }
-
     float gridTopY = ingredientRects[0][0].y;
     float gridBottomY = ingredientRects[2][0].y - ingredientRects[2][0].h;
 
-    gl::Graphics::drawText(
-        "Your Potion",
-        glm::vec2(size.x / 2, gridTopY + 80.0f),
-        36.0f,
-        currentPotion,
-        gl::TextAlign::CENTER
-        );
-
-    // TARGET
-    gl::Graphics::drawText(
-        "Target Potion",
-        glm::vec2(size.x / 2, gridTopY - 340.0f),
-        32.0f,
-        targetPotion,
-        gl::TextAlign::CENTER
-        );
+    gl::Graphics::drawText("Your Potion",
+                           glm::vec2(size.x / 2, gridTopY + 120.0f), 60.0f,
+                           currentPotion, gl::TextAlign::CENTER, "magic");
+    gl::Graphics::drawText("Target Potion",
+                           glm::vec2(size.x / 2, gridTopY - 360.0f), 60.0f,
+                           targetPotion,
+                           gl::TextAlign::CENTER, "magic");
 
     // WIN
     float eps = 0.05f;
@@ -849,31 +838,32 @@ void Screen::drawPotionPuzzle() {
 
     if (won) {
         wonPotion = true;
-        setPuzzleBool(3,true);
-
-        gl::Graphics::drawText(
-            "YOU WON A GEM!",
-            glm::vec2(size.x / 2, gridTopY + 180.0f),
-            42.0f,
-            glm::vec3(0.2f, 1.0f, 0.2f),
-            gl::TextAlign::CENTER
-            );
+        if (!puzzle3_done) {
+            incrementGems();
+            puzzle3_done = true;
+            gl::AudioEngine::playSound("yay", 0.3f);
+        }
+        gl::Graphics::drawText("You won a gem!",
+                               glm::vec2(size.x / 2, (size.y / 2) - 400.0f), 100.0f,
+                               glm::vec3(0.0f, 1.0f, 0.0f),
+                               gl::TextAlign::CENTER, "magic");
+        gl::Graphics::drawText("ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, (size.y / 2) - 300.0f), 70.0f,
+                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
+    } else {
+        gl::Graphics::drawText("Click ingredients to mix a potion that",
+                               glm::vec2(size.x/2, (size.y / 2) - 340.0f), 60.0f,
+                               glm::vec3(1.0f),
+                               gl::TextAlign::CENTER);
+        gl::Graphics::drawText("matches the color of the target potion",
+                               glm::vec2(size.x/2, (size.y / 2) - 280.0f), 60.0f,
+                               glm::vec3(1.0f),
+                               gl::TextAlign::CENTER);
+        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, (size.y / 2) - 440.0f), 50.0f,
+                               glm::vec3(0.941f, 0.961f, 0.714f),
+                               gl::TextAlign::CENTER);
     }
-
-    gl::Graphics::drawText(
-        "Click ingredients to mix potion",
-        glm::vec2(size.x/2, 80),
-        24.0f,
-        glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
-    gl::Graphics::drawText(
-        "R = Restart   |   ESC = Exit Puzzle",
-        glm::vec2(size.x / 2, 30),
-        28.0f,
-        glm::vec3(1.0f),
-        gl::TextAlign::CENTER
-        );
 }
 
 void Screen::incrementGems() {
@@ -900,7 +890,7 @@ void Screen::resetPuzzles() {
 
     initPuzzleGrid();
     initWordPuzzle();
-    initColorPuzzle();
+    initPotionPuzzle();
 }
 
 bool Screen::getPuzzleBool(int puzzle_num) {

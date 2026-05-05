@@ -21,7 +21,9 @@ namespace gl {
         Mesh::initializeDefaultShapes();
         Material::initializeBlankTexture();
         TextRenderer::initialize();
-        TextRenderer::loadFont("default", "resources/fonts/default.ttf");
+        //TextRenderer::loadFont("default", "resources/fonts/default.ttf");
+        TextRenderer::loadFont("default", "resources/fonts/OldJakarta.ttf");
+        TextRenderer::loadFont("magic", "resources/fonts/Magic.ttf");
     }
 
     void Graphics::tearDown() {
