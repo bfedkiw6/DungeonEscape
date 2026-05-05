@@ -103,8 +103,8 @@ void BasicGame::createGuard() {
 
     guard_obj->addCollisionComp();
     CollisionComponent* gc = guard_obj->getCollisionComp();
-    gc->radius = 0.5f; // TODO: adjust
-    gc->height = 1.0f; // TODO: adjust
+    gc->radius = 0.5f;
+    gc->height = 1.0f;
     gc->shape = CollisionShape::CYLINDER;
 
     guard_obj->addSkinnedMeshComp();
@@ -140,15 +140,10 @@ void BasicGame::createWalls() {
     std::vector<glm::vec3> scales;
     int num_walls = 11;
     getWallTransforms(positions, scales);
-    //gl::DrawShape* wall_shape = gl::Mesh::getLoadedShape("cube");
 
     for (int i = 0; i < num_walls; i++) {
         GameObject* wall = world.addGameObject();
         wall->type = ObjectType::WALLS;
-
-        /*wall->addDrawableComp();
-        wall->getDrawableComp()->shape = wall_shape;
-        draw_system.addGameObject(wall);*/
 
         wall->addTransformComp();
         wall->getTransformComp()->pos = positions[i];
@@ -169,19 +164,9 @@ void BasicGame::createItemCollisions() {
     int num_items = 17;
     getItemTransforms(positions, scales, shapes);
 
-    /*gl::DrawShape* cube_shape = gl::Mesh::getLoadedShape("cube");
-    gl::DrawShape* sphere_shape = gl::Mesh::getLoadedShape("sphere");
-    gl::DrawShape* cylinder_shape = gl::Mesh::getLoadedShape("cylinder");*/
-
     for (int i = 0; i < num_items; i++) {
         GameObject* item = world.addGameObject();
         item->type = ObjectType::ITEMS;
-
-        /*item->addDrawableComp();
-        if (shapes[i] == CollisionShape::BOX) { item->getDrawableComp()->shape = cube_shape; }
-        if (shapes[i] == CollisionShape::SPHERE) { item->getDrawableComp()->shape = sphere_shape; }
-        if (shapes[i] == CollisionShape::CYLINDER) { item->getDrawableComp()->shape = cylinder_shape; }
-        draw_system.addGameObject(item);*/
 
         item->addTransformComp();
         item->getTransformComp()->pos = positions[i];
@@ -226,6 +211,7 @@ void BasicGame::setupAudio() {
     gl::AudioEngine::loadSound("resources/audio/yay.wav", "yay");
     gl::AudioEngine::loadSound("resources/audio/applause.wav", "applause");
     gl::AudioEngine::loadSound("resources/audio/door.wav", "door");
+    gl::AudioEngine::loadSound("resources/audio/boo.wav", "boo");
 }
 
 void BasicGame::draw() {
@@ -272,24 +258,14 @@ void BasicGame::update(double delta_time) {
     // System updates
     if (screen.getType() != ScreenType::GUARD) {
         // When talking to guard, stop camera & player from moving
-
         character_system.updateWorld(world, dt);
-        //std::cout << "before camera\n";
         camera_system.updateWorld(world, dt);
-        //std::cout << "after camera\n";
         gl::AudioEngine::setListener(cam->getPosition());
-        //std::cout << "after audio\n";
     }
-    //std::cout << "before all updates\n";
     collision_system.updateWorld(world, dt);
     obj_system.updateWorld(world, dt);
     particle_system.updateWorld(world, dt);
     animation_system.updateWorld(world, dt);
-
-    // Gem update & check
-    /*if (puzzle sucess) {
-        screen.incrementGems();
-    }*/
 }
 
 void BasicGame::updateMagicSpots(float dt) {
@@ -324,6 +300,7 @@ void BasicGame::updateMagicSpots(float dt) {
 
 void BasicGame::resetLevel() {
     screen.resetGems();
+    screen.resetPuzzles();
 
     character_system.reset();
     player_obj->getTransformComp()->pos = glm::vec3(11.5118f, 0.0f, 29.7553f);
@@ -373,14 +350,6 @@ void BasicGame::mousePositionEvent(double x_pos, double y_pos) {
         prev_mouse_pos = curr_mouse_pos;
         return;
     }
-    // When switching screens, big camera jumps tend to happen --> avoid them
-
-    // if (screen.switchScreen) {
-    //     prev_mouse_pos = curr_mouse_pos;
-    //     screen.switchScreen = false;
-    //     return;
-    // }
-
     glm::vec2 delta = prev_mouse_pos - curr_mouse_pos;
     camera_system.setMouseDelta(delta);
 
