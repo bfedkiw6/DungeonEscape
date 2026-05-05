@@ -229,17 +229,13 @@ void BasicGame::setupAudio() {
 }
 
 void BasicGame::draw() {
-    std::cout << "basic draw\n";
     if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD
         && screen.getType() != ScreenType::DOOR) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
-        std::cout << "simple draw\n";
         screen.draw();
         return;
     }
-    std::cout << "before update world\n";
     draw_system.updateWorld(world, 0.0f);
-    std::cout << "after update world\n";
     screen.draw();
 }
 
@@ -267,36 +263,28 @@ void BasicGame::update(double delta_time) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
-    std::cout << "update happens in game screen\n";
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
     screen.setCamPos(camera_system.getCameraPos()); // For screen changes
-    std::cout << "update before magic spots\n";
     updateMagicSpots(dt); // For particle updates
-    std::cout << "update after magicSpots\n";
 
     // System updates
     if (screen.getType() != ScreenType::GUARD) {
         // When talking to guard, stop camera & player from moving
 
-        std::cout << "before character system\n";
         character_system.updateWorld(world, dt);
-        std::cout << "before camera\n";
+        //std::cout << "before camera\n";
         camera_system.updateWorld(world, dt);
-        std::cout << "after camera\n";
+        //std::cout << "after camera\n";
         gl::AudioEngine::setListener(cam->getPosition());
-        std::cout << "after audio\n";
+        //std::cout << "after audio\n";
     }
-    std::cout << "before all updates\n";
+    //std::cout << "before all updates\n";
     collision_system.updateWorld(world, dt);
-    std::cout << "after collision\n";
     obj_system.updateWorld(world, dt);
-    std::cout << "after obj\n";
     particle_system.updateWorld(world, dt);
-    //std::cout << "after particle\n";
     animation_system.updateWorld(world, dt);
-    //std::cout << "after animation\n";
 
     // Gem update & check
     /*if (puzzle sucess) {

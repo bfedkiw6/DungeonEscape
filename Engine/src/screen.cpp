@@ -21,7 +21,6 @@ Screen::Screen() {
     tb.setRotation(glm::mat4(1.0f));
     background_mat.textures = gl::Material::loadTexture("resources/images/magic.png");
 
-    //Rect grid[3][3];
     initPuzzleGrid();
 
     //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
@@ -32,10 +31,9 @@ void Screen::setCamPos(glm::vec3 pos) {
 }
 
 void Screen::draw() {
-    std::cout << "DRAW CALLED\n";
     if (type_ == ScreenType::MAINMENU) {
         Window::showMouse();
-        std::cout << "Draw main\n";
+        //std::cout << "Draw main\n";
         drawMainMenu();
     } else if (type_ == ScreenType::PAUSE) {
         Window::showMouse();
@@ -57,7 +55,7 @@ void Screen::draw() {
         drawPuzzle1();
     } else {
         Window::hideMouse();
-        std::cout << "draw game\n";
+        //std::cout << "draw game\n";
         drawNearbyDialogue();
         drawGameScreen();
     }
