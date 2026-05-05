@@ -739,7 +739,7 @@ void Screen::drawWordPuzzle() {
                                glm::vec2(size.x / 2, (size.y / 2) + 180.0f), 70.0f,
                                glm::vec3(0.0f, 0.0f, 1.0f),
                                gl::TextAlign::CENTER);
-        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
+        gl::Graphics::drawText("ESC = Exit Puzzle",
                                glm::vec2(size.x / 2, size.y - 50.0f), 60.0f,
                                glm::vec3(0.384f, 0.0f, 0.49f),
                                gl::TextAlign::CENTER);
