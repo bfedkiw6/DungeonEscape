@@ -23,6 +23,8 @@ Screen::Screen() {
 
     initPuzzleGrid();
     initWordPuzzle();
+    initPotionPuzzle();
+
 
     //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
 }
@@ -57,6 +59,9 @@ void Screen::draw() {
     } else if (type_ == ScreenType::PUZZLE2) {
         Window::showMouse();
         drawWordPuzzle();
+    } else if (type_ == ScreenType::PUZZLE2) {
+        Window::showMouse();
+        drawPotionPuzzle();
     } else {
         Window::hideMouse();
         //std::cout << "draw game\n";
@@ -205,7 +210,16 @@ void Screen::keyEvent(int key, int action) {
                 }
                 break;
             case ScreenType::PUZZLE3:
-
+                if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+                    initPotionPuzzle(); // reset puzzle
+                    return;
+                }
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+                    switchScreen = true;
+                    type_ = ScreenType::GAME;
+                    Window::hideMouse();
+                    return;
+                }
                 break;
 
         }
@@ -220,6 +234,10 @@ bool inside(Screen::Rect r, double x, double y) {
 
 void Screen::setMousePos(glm::vec2 pos) {
     mouse_pos = pos;
+}
+
+glm::vec3 clampColor(glm::vec3 c) {
+    return glm::clamp(c, 0.0f, 1.0f);
 }
 
 void Screen::toggleCell(int i, int j) {
@@ -300,6 +318,37 @@ void Screen::mouseButtonEvent(int button, int action) {
         }
     }
 
+    if(type_ == ScreenType::PUZZLE3){
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+
+            glm::vec2 size = Window::getSize();
+
+            double mx = mouse_pos.x;
+            double my = mouse_pos.y;
+
+            const int N = 3;
+
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+
+                    Rect r = ingredientRects[i][j];
+
+                    if (mx >= r.x && mx <= r.x + r.w &&
+                        my <= r.y && my >= r.y - r.h) {
+
+                        selected[i][j] = true;
+                        glm::vec3 newColor = ingredientColors[i][j];
+                        float count = static_cast<float>(mixCount);
+                        currentPotion = (currentPotion * count + newColor) / (count + 1.0f);
+                        mixCount++;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+
 }
 
 void Screen::mousePositionEvent(double x_pos, double y_pos) {
@@ -313,6 +362,7 @@ void Screen::mouseScrolledEvent(double x_offset, double y_offset) {
 void Screen::resizeWindowEvent(int new_width, int new_height) {
     initPuzzleGrid();
     initWordPuzzle();
+    initPotionPuzzle();
 }
 
 ScreenType Screen::getType() {
@@ -721,47 +771,134 @@ void Screen::drawWordPuzzle() {
         );
 }
 
-void Screen::initColorPuzzle() {
-    glm::vec2 size = Window::getSize();
+void Screen::initPotionPuzzle() {
 
     const int N = 3;
 
-    float cell = 140.0f;
+    glm::vec2 size = Window::getSize();
+
+    float cellW = 220.0f;
+    float cellH = 60.0f;
     float spacing = 20.0f;
 
-    float totalW = N * cell + (N - 1) * spacing;
-    float totalH = N * cell + (N - 1) * spacing;
+    float totalW = N * cellW + (N - 1) * spacing;
+    float totalH = N * cellH + (N - 1) * spacing;
 
     float startX = (size.x - totalW) / 2.0f;
     float startY = (size.y + totalH) / 2.0f;
 
-    glm::vec3 palette[3][3] = {
-        { {1,0,0}, {0,1,0}, {0,0,1} },
-        { {1,1,0}, {0,1,1}, {1,0,1} },
-        { {1,0.5,0}, {0.5,0,1}, {1,1,1} }
+    std::string names[N][N] = {
+        {"Unicorn Horn", "Dragon Scale", "Mandrake"},
+        {"Amber", "Nightshade", "Fairy Dust"},
+        {"Goblin Ear", "Phoenix Ash", "Moonwater"}
+    };
+
+    glm::vec3 colors[N][N] = {
+        { {1,1,1}, {1,0,0}, {0.5,0.3,0.1} },
+        { {1,0.6,0}, {0.2,0,0.4}, {1,0.4,1} },
+        { {0.3,0.8,0.3}, {1,0.5,0}, {0.4,0.6,1} }
     };
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
 
-            colorGrid[i][j] = palette[i][j];
-
-            colorRects[i][j] = {
-                startX + j * (cell + spacing),
-                startY - i * (cell + spacing),
-                cell,
-                cell
+            ingredientRects[i][j] = {
+                startX + j * (cellW + spacing),
+                startY - i * (cellH + spacing),
+                cellW,
+                cellH
             };
+
+            ingredientNames[i][j] = names[i][j];
+            ingredientColors[i][j] = colors[i][j];
+            selected[i][j] = false;
         }
     }
 
-    currentColor = glm::vec3(0.0f);
-    colorPuzzleWon = false;
+    currentPotion = glm::vec3(0.0f);
+    targetPotion = glm::vec3(1.0f, 0.5f, 0.5f);
+    mixCount = 0;
+    wonPotion = false;
 }
 
-glm::vec3 mixColors(glm::vec3 a, glm::vec3 b) {
-    glm::vec3 result = a + b;
-    return glm::clamp(result, 0.0f, 1.0f);
+void Screen::drawPotionPuzzle() {
+    glm::vec2 size = Window::getSize();
+
+    gl::Graphics::useTextShader();
+
+    const int N = 3;
+
+    // GRID
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+
+            Rect r = ingredientRects[i][j];
+
+            glm::vec3 col = selected[i][j]
+                                ? glm::vec3(1.0f)
+                                : ingredientColors[i][j];
+
+            gl::Graphics::drawText(
+                ingredientNames[i][j],
+                glm::vec2(r.x + r.w/2, r.y - r.h/2),
+                28.0f,
+                col,
+                gl::TextAlign::CENTER
+                );
+        }
+    }
+
+    float gridTopY = ingredientRects[0][0].y;
+    float gridBottomY = ingredientRects[2][0].y - ingredientRects[2][0].h;
+
+    gl::Graphics::drawText(
+        "Your Potion",
+        glm::vec2(size.x / 2, gridTopY + 80.0f),
+        36.0f,
+        currentPotion,
+        gl::TextAlign::CENTER
+        );
+
+    // TARGET
+    gl::Graphics::drawText(
+        "Target Potion",
+        glm::vec2(size.x / 2, gridTopY - 340.0f),
+        32.0f,
+        targetPotion,
+        gl::TextAlign::CENTER
+        );
+
+    // WIN
+    float eps = 0.05f;
+    bool won = glm::length(currentPotion - targetPotion) < eps;
+
+    if (won) {
+        wonPotion = true;
+        setPuzzleBool(3,true);
+
+        gl::Graphics::drawText(
+            "YOU WON A GEM!",
+            glm::vec2(size.x / 2, gridTopY + 180.0f),
+            42.0f,
+            glm::vec3(0.2f, 1.0f, 0.2f),
+            gl::TextAlign::CENTER
+            );
+    }
+
+    gl::Graphics::drawText(
+        "Click ingredients to mix potion",
+        glm::vec2(size.x/2, 80),
+        24.0f,
+        glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
+    gl::Graphics::drawText(
+        "R = Restart   |   ESC = Exit Puzzle",
+        glm::vec2(size.x / 2, 30),
+        28.0f,
+        glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
 }
 
 void Screen::incrementGems() {
