@@ -7,6 +7,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+// struct Rect {
+//     float x, y, w, h;
+// };
+
 Screen::Screen() {
     cam = std::make_unique<gl::Camera>();
     cam->setPosition(glm::vec3(0.0f, cam->getHeight(), 0.0f));
@@ -17,6 +21,9 @@ Screen::Screen() {
     tb.setRotation(glm::mat4(1.0f));
     background_mat.textures = gl::Material::loadTexture("resources/images/magic.png");
 
+    //Rect grid[3][3];
+    initPuzzleGrid();
+
     //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
 }
 
@@ -25,8 +32,10 @@ void Screen::setCamPos(glm::vec3 pos) {
 }
 
 void Screen::draw() {
+    std::cout << "DRAW CALLED\n";
     if (type_ == ScreenType::MAINMENU) {
         Window::showMouse();
+        std::cout << "Draw main\n";
         drawMainMenu();
     } else if (type_ == ScreenType::PAUSE) {
         Window::showMouse();
@@ -43,8 +52,12 @@ void Screen::draw() {
     } else if (type_ == ScreenType::DOOR) {
         Window::hideMouse();
         drawDoorDialogue();
+    } else if (type_ == ScreenType::PUZZLE1) {
+        Window::showMouse();
+        drawPuzzle1();
     } else {
         Window::hideMouse();
+        std::cout << "draw game\n";
         drawNearbyDialogue();
         drawGameScreen();
     }
@@ -60,8 +73,10 @@ void Screen::keyEvent(int key, int action) {
         switch(type_) {
             case ScreenType::MAINMENU:
                 if (key == GLFW_KEY_ENTER) {
+                    std::cout << "ENTER PRESSED\n";
                     switchScreen = true;
                     type_ = ScreenType::GAME;
+                    switchScreen = false;
                     Window::hideMouse();
                 }
                 break;
@@ -96,7 +111,7 @@ void Screen::keyEvent(int key, int action) {
                         Window::hideMouse();
                     }
                     // TODO: add being near puzzles --> switch screen to appropiate puzzle
-                    /*else if (puzzle1_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.6f && cam_pos.x > 25.0971f
+                    else if (puzzle1_done == false && cam_pos.y == 0.75f && cam_pos.x < 29.6f && cam_pos.x > 25.0971f
                              && cam_pos.z < 30.6541f && cam_pos.z > 24.6f) {
                         switchScreen = true;
                         type_ = ScreenType::PUZZLE1;
@@ -113,7 +128,7 @@ void Screen::keyEvent(int key, int action) {
                         switchScreen = true;
                         type_ = ScreenType::PUZZLE3;
                         Window::showMouse();
-                    }*/
+                    }
                 }
                 break;
             case ScreenType::WIN:
@@ -165,11 +180,83 @@ void Screen::keyEvent(int key, int action) {
                     }
                 }
                 break;
+            case ScreenType::PUZZLE1:
+                if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+                    initPuzzleGrid(); // reset puzzle
+                    return;
+                }
+
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+                    switchScreen = true;
+                    type_ = ScreenType::GAME;
+                    Window::hideMouse();
+                    return;
+                }
+
+                break;
+            case ScreenType::PUZZLE2:
+
+                break;
+            case ScreenType::PUZZLE3:
+
+                break;
+
         }
     }
 }
 
+
+bool inside(Screen::Rect r, double x, double y) {
+    return x >= r.x && x <= r.x + r.w &&
+           y <= r.y && y >= r.y - r.h;
+}
+
+void Screen::setMousePos(glm::vec2 pos) {
+    mouse_pos = pos;
+}
+
+void Screen::toggleCell(int i, int j) {
+    const int N = 5;
+
+    if (i < 0 || i >= N || j < 0 || j >= N)
+        return;
+
+    puzzle_grid[i][j] = !puzzle_grid[i][j];
+}
+
 void Screen::mouseButtonEvent(int button, int action) {
+    //if (type_ != ScreenType::PUZZLE1) return;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+
+        double mx = mouse_pos.x;
+        double my = mouse_pos.y;
+
+        const int N = 5;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+
+                Rect r = grid[i][j];
+
+                if (mx >= r.x && mx <= r.x + r.w &&
+                    my <= r.y && my >= r.y - r.h) {
+
+                    // Lights Out rule:
+                    toggleCell(i, j);       // self
+                    toggleCell(i + 1, j);   // down
+                    toggleCell(i - 1, j);   // up
+                    toggleCell(i, j + 1);   // right
+                    toggleCell(i, j - 1);   // left
+
+                    last_clicked_row = i;
+                    last_clicked_col = j;
+
+                    return;
+                }
+            }
+        }
+    }
 
 }
 
@@ -182,7 +269,7 @@ void Screen::mouseScrolledEvent(double x_offset, double y_offset) {
 }
 
 void Screen::resizeWindowEvent(int new_width, int new_height) {
-
+    initPuzzleGrid();
 }
 
 ScreenType Screen::getType() {
@@ -391,6 +478,121 @@ void Screen::drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial 
     gl::Graphics::setAmbientLight(glm::vec3(0.5f));
     gl::Graphics::setCameraUniforms(cam.get());
     gl::Graphics::drawObject(shape, t, mat);
+}
+
+void Screen::initPuzzleGrid() {
+    glm::vec2 size = Window::getSize();
+
+    const int N = 5;
+
+    float cellW = 120.0f;
+    float cellH = 120.0f;
+    float spacing = 20.0f;
+
+    float totalW = N * cellW + (N - 1) * spacing;
+    float totalH = N * cellH + (N - 1) * spacing;
+
+    float startX = (size.x - totalW) / 2.0f;
+    float startY = (size.y + totalH) / 2.0f;
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            grid[i][j] = {
+                startX + j * (cellW + spacing),
+                startY - i * (cellH + spacing),
+                cellW,
+                cellH
+            };
+            puzzle_grid[i][j] = false;
+        }
+    }
+    gridBottomY = (size.y / 2.0f - totalH / 2.0f);
+
+    puzzle_grid[0][0] = true;
+    puzzle_grid[1][1] = true;
+    puzzle_grid[1][0] = true;
+
+    puzzle_grid[0][4] = true;
+    puzzle_grid[0][3] = true;
+    puzzle_grid[1][4] = true;
+
+    puzzle_grid[3][1] = true;
+    puzzle_grid[4][1] = true;
+
+}
+
+bool Screen::checkWin1() {
+    const int N = 5;
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (puzzle_grid[i][j])
+                return false;
+        }
+    }
+    return true;
+}
+
+void Screen::drawPuzzle1() {
+    glm::vec2 size = Window::getSize();
+
+    gl::Graphics::useTextShader();
+
+    // draw grid squares
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+
+            Rect r = grid[i][j];
+
+            std::string label = puzzle_grid[i][j] ? "ON" : "OFF";
+
+            gl::Graphics::drawText(
+                label,
+                glm::vec2(r.x + r.w/2, r.y - r.h/2),
+                32.0f,
+                puzzle_grid[i][j] ? glm::vec3(0.2f, 1.0f, 0.2f)
+                                  : glm::vec3(1.0f, 1.0f, 1.0f),
+                gl::TextAlign::CENTER
+                );
+        }
+    }
+
+    // bottom message
+    bool won = checkWin1();
+
+    std::string msg;
+
+    if (won) {
+        incrementGems();
+        setPuzzleBool(1,true);
+        msg = "YOU WON A GEM!";
+    }
+    // else if (last_clicked_row != -1) {
+    //     msg = "Clicked: (" +
+    //           std::to_string(last_clicked_row) + "," +
+    //           std::to_string(last_clicked_col) + ")";
+    // }
+    else {
+        msg = "Turn off the lights!";
+    }
+    gl::Graphics::drawText(
+        msg,
+        glm::vec2(size.x / 2, 100.0f),
+        40.0f,
+        won ? glm::vec3(0.2f, 1.0f, 0.2f)
+            : glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
+
+    //glm::vec2 size = Window::getSize();
+
+    gl::Graphics::drawText(
+        "R = Restart   |   ESC = Exit Puzzle",
+        glm::vec2(size.x / 2, gridBottomY - 120.0f),
+        28.0f,
+        glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
 }
 
 void Screen::incrementGems() {

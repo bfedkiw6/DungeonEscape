@@ -58,11 +58,19 @@ namespace gl {
     }
 
     GLint ShaderProgram::getLocation(const char* uniform_name) const {
-        if (const auto location = glGetUniformLocation(program_id_, uniform_name); location != INVALID_UNIFORM_LOCATION) {
-            return location;
+        // if (const auto location = glGetUniformLocation(program_id_, uniform_name); location != INVALID_UNIFORM_LOCATION) {
+        //     return location;
+        // }
+        // debug::error("Failed to get uniform location '{}' for shader: '{}'", uniform_name, name_);
+        // return 0;
+        GLint location = glGetUniformLocation(program_id_, uniform_name);
+
+        if (location == -1) {
+            debug::warn("Uniform '{}' not found or optimized out in shader '{}'", uniform_name, name_);
         }
-        debug::error("Failed to get uniform location '{}' for shader: '{}'", uniform_name, name_);
-        return 0;
+
+        return location;
+
     }
 
     /**

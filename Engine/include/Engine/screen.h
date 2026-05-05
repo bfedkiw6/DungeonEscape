@@ -13,9 +13,9 @@ enum class ScreenType {
     LOSE,
     GUARD,
     DOOR,
-    /*PUZZLE1,
+    PUZZLE1,
     PUZZLE2,
-    PUZZLE3*/
+    PUZZLE3
 };
 
 class Screen : public Game {
@@ -48,6 +48,13 @@ public:
     void setPuzzleBool(int puzzle_num, bool val);
     bool getPuzzleBool(int puzzle_num);
 
+    void setMousePos(glm::vec2 pos);
+
+    struct Rect {
+        float x, y, w, h;
+    };
+    Rect grid[5][5];
+
 private:
     void drawMainMenu();
     void drawPauseScreen();
@@ -58,6 +65,11 @@ private:
     void drawGuardDialogue();
     void drawDoorDialogue();
     void drawNearbyDialogue();
+
+    void initPuzzleGrid();
+    void drawPuzzle1();
+    void toggleCell(int i, int j);
+    bool checkWin1();
 
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
@@ -80,4 +92,16 @@ private:
     bool puzzle1_done = false;
     bool puzzle2_done = false;
     bool puzzle3_done = false;
+
+
+    bool puzzle_grid[5][5] = { false };
+    int last_clicked_row = -1;
+    int last_clicked_col = -1;
+
+    glm::vec2 mouse_pos;
+    float gridBottomY;
+
+
+
+
 };

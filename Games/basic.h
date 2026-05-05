@@ -17,6 +17,7 @@
 #include <Engine/Systems/aisystem.h>
 #include <Engine/Systems/particlesystem.h>
 #include <Engine/Systems/animationsystem.h>
+#include <chrono>
 
 class BasicGame: public Game {
 
@@ -93,4 +94,6 @@ private:
     ScreenType screen_type;
     std::unique_ptr<gl::Camera> cam;
     glm::vec2 prev_mouse_pos = glm::vec2(0.0f);
+
+    glm::vec2 mouse_pos;
 };

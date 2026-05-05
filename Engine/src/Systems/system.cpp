@@ -1,4 +1,5 @@
 #include <Engine/Systems/system.h>
+#include <algorithm>
 
 void System::addGameObject(GameObject* obj) {
     m_objects.push_back(obj);

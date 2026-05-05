@@ -15,7 +15,7 @@ target_link_libraries(CS1950UEngine PUBLIC
     stb
     imgui
     raudio
-    system
+    
 )
 
 set(CS1950UEngine_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/include")

@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <random>
+#include <chrono>
 
 gl::DrawMaterial player_mat;
 std::mt19937 gen(std::random_device{}());
@@ -228,13 +229,17 @@ void BasicGame::setupAudio() {
 }
 
 void BasicGame::draw() {
+    std::cout << "basic draw\n";
     if (screen.getType() != ScreenType::GAME && screen.getType() != ScreenType::GUARD
         && screen.getType() != ScreenType::DOOR) {
         gl::Graphics::clearScreen(glm::vec3(0.1f, 0.1f, 0.1f));
+        std::cout << "simple draw\n";
         screen.draw();
         return;
     }
+    std::cout << "before update world\n";
     draw_system.updateWorld(world, 0.0f);
+    std::cout << "after update world\n";
     screen.draw();
 }
 
@@ -262,23 +267,36 @@ void BasicGame::update(double delta_time) {
         // Character shouldn't be able to move in main menu/pause
         return;
     }
+    std::cout << "update happens in game screen\n";
     float dt = (float)delta_time;
     player_obj->getDrawableComp()->visible = false;
     collision_system.setOldPosition(character_system.getOldPosition()); // For wall collisions
     screen.setCamPos(camera_system.getCameraPos()); // For screen changes
+    std::cout << "update before magic spots\n";
     updateMagicSpots(dt); // For particle updates
+    std::cout << "update after magicSpots\n";
 
     // System updates
     if (screen.getType() != ScreenType::GUARD) {
         // When talking to guard, stop camera & player from moving
+
+        std::cout << "before character system\n";
         character_system.updateWorld(world, dt);
+        std::cout << "before camera\n";
         camera_system.updateWorld(world, dt);
+        std::cout << "after camera\n";
         gl::AudioEngine::setListener(cam->getPosition());
+        std::cout << "after audio\n";
     }
+    std::cout << "before all updates\n";
     collision_system.updateWorld(world, dt);
+    std::cout << "after collision\n";
     obj_system.updateWorld(world, dt);
+    std::cout << "after obj\n";
     particle_system.updateWorld(world, dt);
+    //std::cout << "after particle\n";
     animation_system.updateWorld(world, dt);
+    //std::cout << "after animation\n";
 
     // Gem update & check
     /*if (puzzle sucess) {
@@ -353,10 +371,13 @@ void BasicGame::keyEvent(int key, int action) {
 }
 
 void BasicGame::mouseButtonEvent(int button, int action) {
+    screen.setMousePos(mouse_pos);
+    screen.mouseButtonEvent(button, action);
 
 }
 
 void BasicGame::mousePositionEvent(double x_pos, double y_pos) {
+    mouse_pos = glm::vec2(x_pos, y_pos);
     glm::vec2 curr_mouse_pos = glm::vec2((float)x_pos, (float)y_pos);
 
     // If not in game don't move camera, but should update mouse pos
@@ -365,11 +386,12 @@ void BasicGame::mousePositionEvent(double x_pos, double y_pos) {
         return;
     }
     // When switching screens, big camera jumps tend to happen --> avoid them
-    if (screen.switchScreen) {
-        prev_mouse_pos = curr_mouse_pos;
-        screen.switchScreen = false;
-        return;
-    }
+
+    // if (screen.switchScreen) {
+    //     prev_mouse_pos = curr_mouse_pos;
+    //     screen.switchScreen = false;
+    //     return;
+    // }
 
     glm::vec2 delta = prev_mouse_pos - curr_mouse_pos;
     camera_system.setMouseDelta(delta);
@@ -384,6 +406,7 @@ void BasicGame::mouseScrolledEvent(double x_offset, double y_offset) {
 
 void BasicGame::resizeWindowEvent(int new_width, int new_height) {
     camera_system.resizeWindowEvent(new_width, new_height);
+    screen.resizeWindowEvent(new_width, new_height);
 }
 
 void BasicGame::getWallTransforms(std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
