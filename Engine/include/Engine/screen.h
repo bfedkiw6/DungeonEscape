@@ -66,6 +66,16 @@ private:
     void drawDoorDialogue();
     void drawNearbyDialogue();
 
+    void initPuzzleGrid();
+    void drawPuzzle1();
+    void toggleCell(int i, int j);
+    bool checkWin1();
+
+    void initWordPuzzle();
+    void drawWordPuzzle();
+    void initPotionPuzzle();
+    void drawPotionPuzzle();
+
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
@@ -118,12 +128,27 @@ private:
     glm::vec3 targetColor  = glm::vec3(1.0f, 0.0f, 1.0f); //purple
     bool colorPuzzleWon = false;
 
-    glm::vec3 colorGrid[3][3];
-    Rect colorRects[3][3];
-    glm::vec3 palette[3][3] = {
-        { glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) },
-        { glm::vec3(1,1,0), glm::vec3(0,1,1), glm::vec3(1,0,1) },
-        { glm::vec3(1,0.5,0), glm::vec3(0.5,0,1), glm::vec3(1,1,1) }
+    const int N = 3;
+
+    std::string ingredientNames[3][3] = {
+        {"Unicorn Horn", "Dragon Scale", "Mandrake"},
+        {"Amber", "Nightshade", "Fairy Dust"},
+        {"Goblin Ear", "Phoenix Ash", "Moonwater"}
     };
 
+    glm::vec3 ingredientColors[3][3] = {
+        {glm::vec3(1,1,1), glm::vec3(1,0,0), glm::vec3(0.5,0.3,0.1)},
+        {glm::vec3(1,0.6,0), glm::vec3(0.2,0,0.4), glm::vec3(1,0.4,1)},
+        {glm::vec3(0.3,0.8,0.3), glm::vec3(1,0.5,0), glm::vec3(0.4,0.6,1)}
+    };
+
+    Rect ingredientRects[3][3];
+
+    bool selected[3][3] = {false};
+
+    glm::vec3 currentPotion = glm::vec3(0.0f);
+    glm::vec3 targetPotion = glm::vec3(1.0f, 0.5f, 0.5f);
+
+    bool wonPotion = false;
+    int mixCount = 0;
 };
