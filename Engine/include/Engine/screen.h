@@ -71,6 +71,9 @@ private:
     void toggleCell(int i, int j);
     bool checkWin1();
 
+    void initWordPuzzle();
+    void drawWordPuzzle();
+
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
     ScreenType type_;
@@ -101,7 +104,11 @@ private:
     glm::vec2 mouse_pos;
     float gridBottomY;
 
+    std::string targetWord = "ENCHANTMENT";
+    std::string currentWord = "";
+    bool wordPuzzleWon = false;
 
-
+    char letterGrid[12];
+    Rect letterRects[12];
 
 };

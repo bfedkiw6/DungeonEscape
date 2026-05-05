@@ -22,6 +22,7 @@ Screen::Screen() {
     background_mat.textures = gl::Material::loadTexture("resources/images/magic.png");
 
     initPuzzleGrid();
+    initWordPuzzle();
 
     //skull_mesh = gl::Mesh::loadStaticMesh("resources/models/Skull/12140_Skull_v3_L2.obj");
 }
@@ -53,6 +54,9 @@ void Screen::draw() {
     } else if (type_ == ScreenType::PUZZLE1) {
         Window::showMouse();
         drawPuzzle1();
+    } else if (type_ == ScreenType::PUZZLE2) {
+        Window::showMouse();
+        drawWordPuzzle();
     } else {
         Window::hideMouse();
         //std::cout << "draw game\n";
@@ -193,7 +197,12 @@ void Screen::keyEvent(int key, int action) {
 
                 break;
             case ScreenType::PUZZLE2:
-
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+                    switchScreen = true;
+                    type_ = ScreenType::GAME;
+                    Window::hideMouse();
+                    return;
+                }
                 break;
             case ScreenType::PUZZLE3:
 
@@ -225,30 +234,65 @@ void Screen::toggleCell(int i, int j) {
 void Screen::mouseButtonEvent(int button, int action) {
     //if (type_ != ScreenType::PUZZLE1) return;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if(type_ == ScreenType::PUZZLE1){
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 
-        double mx = mouse_pos.x;
-        double my = mouse_pos.y;
+            double mx = mouse_pos.x;
+            double my = mouse_pos.y;
 
-        const int N = 5;
+            const int N = 5;
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
 
-                Rect r = grid[i][j];
+                    Rect r = grid[i][j];
+
+                    if (mx >= r.x && mx <= r.x + r.w &&
+                        my <= r.y && my >= r.y - r.h) {
+
+                        // Lights Out rule:
+                        toggleCell(i, j);       // self
+                        toggleCell(i + 1, j);   // down
+                        toggleCell(i - 1, j);   // up
+                        toggleCell(i, j + 1);   // right
+                        toggleCell(i, j - 1);   // left
+
+                        last_clicked_row = i;
+                        last_clicked_col = j;
+
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    if(type_ == ScreenType::MAINMENU){
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+
+            double mx = mouse_pos.x;
+            double my = mouse_pos.y;
+
+            const int N = 11;
+
+            for (int i = 0; i < N; i++) {
+
+                Rect r = letterRects[i];
 
                 if (mx >= r.x && mx <= r.x + r.w &&
                     my <= r.y && my >= r.y - r.h) {
 
-                    // Lights Out rule:
-                    toggleCell(i, j);       // self
-                    toggleCell(i + 1, j);   // down
-                    toggleCell(i - 1, j);   // up
-                    toggleCell(i, j + 1);   // right
-                    toggleCell(i, j - 1);   // left
+                    currentWord += letterGrid[i];
 
-                    last_clicked_row = i;
-                    last_clicked_col = j;
+                    //WIN CHECK
+                    if (currentWord == targetWord) {
+                        wordPuzzleWon = true;
+                    }
+
+                    //AUTO RESET CONDITION
+                    if (currentWord.length() >= targetWord.length()) {
+                        currentWord = "";
+                    }
 
                     return;
                 }
@@ -268,6 +312,7 @@ void Screen::mouseScrolledEvent(double x_offset, double y_offset) {
 
 void Screen::resizeWindowEvent(int new_width, int new_height) {
     initPuzzleGrid();
+    initWordPuzzle();
 }
 
 ScreenType Screen::getType() {
@@ -589,6 +634,89 @@ void Screen::drawPuzzle1() {
         glm::vec2(size.x / 2, gridBottomY - 120.0f),
         28.0f,
         glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
+}
+
+void Screen::initWordPuzzle() {
+    glm::vec2 size = Window::getSize();
+
+    float cellW = 100.0f;
+    float cellH = 100.0f;
+    float spacing = 15.0f;
+
+    const int N = 7;
+
+    float totalW = N * cellW + (N - 1) * spacing;
+
+    float startX = (size.x - totalW) / 2.0f;
+    float startY = size.y / 2.0f;
+
+    std::string scrambled = "TNCEHAM"; //scramble
+
+    for (int i = 0; i < N; i++) {
+        letterGrid[i] = scrambled[i];
+
+        letterRects[i] = {
+            startX + i * (cellW + spacing),
+            startY,
+            cellW,
+            cellH
+        };
+    }
+
+    currentWord = "";
+    wordPuzzleWon = false;
+}
+
+void Screen::drawWordPuzzle() {
+
+    glm::vec2 size = Window::getSize();
+
+    gl::Graphics::useTextShader();
+
+    const int N = 11;
+
+    // draw letters
+    for (int i = 0; i < N; i++) {
+
+        Rect r = letterRects[i];
+
+        std::string s(1, letterGrid[i]);
+
+        gl::Graphics::drawText(
+            s,
+            glm::vec2(r.x + r.w/2, r.y - r.h/2),
+            40.0f,
+            glm::vec3(1.0f),
+            gl::TextAlign::CENTER
+            );
+    }
+
+    // progress display
+    std::string msg;
+
+    if (wordPuzzleWon) {
+        incrementGems();
+        setPuzzleBool(2,true);
+        msg = "YOU WON A GEM!";
+    } else {
+        msg = "Assemble Word: " + currentWord;
+    }
+    gl::Graphics::drawText(
+        "ESC = Exit Puzzle",
+        glm::vec2(size.x / 2, gridBottomY - 120.0f),
+        28.0f,
+        glm::vec3(1.0f),
+        gl::TextAlign::CENTER
+        );
+
+    gl::Graphics::drawText(
+        msg,
+        glm::vec2(size.x / 2, 120.0f),
+        36.0f,
+        wordPuzzleWon ? glm::vec3(0.2f, 1.0f, 0.2f)
+                      : glm::vec3(1.0f),
         gl::TextAlign::CENTER
         );
 }
