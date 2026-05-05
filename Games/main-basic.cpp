@@ -2,7 +2,7 @@
 #include <Engine/window.h>
 
 int main() {
-    Window::initialize(1280, 720, "Escape from the Wizard's Dungeon");
+    Window::initialize(1280, 720, "Gembound");
     Window::addGame(std::make_unique<BasicGame>());
 
     // Create game

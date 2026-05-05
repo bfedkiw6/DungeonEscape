@@ -246,7 +246,7 @@ void Screen::toggleCell(int i, int j) {
 
 void Screen::mouseButtonEvent(int button, int action) {
     if (type_ == ScreenType::PUZZLE1){
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !puzzle1_done) {
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
             const int N = 5;
@@ -275,7 +275,7 @@ void Screen::mouseButtonEvent(int button, int action) {
         }
     }
     if (type_ == ScreenType::PUZZLE2){
-        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !puzzle2_done) {
             double mx = mouse_pos.x;
             double my = mouse_pos.y;
             const int N = 11;
@@ -374,7 +374,7 @@ void Screen::drawMainMenu() {
     gl::Graphics::useTextShader();
     glm::vec2 size = Window::getSize();
     glm::vec2 center = size/2.f;
-    gl::Graphics::drawText("Put Game Name Here",
+    gl::Graphics::drawText("Gembound",
                            glm::vec2(center.x, center.y - 280.0f), 100.0f,
                            glm::vec3(1.0f, 1.0f, 1.0f), gl::TextAlign::CENTER, "magic");
     gl::Graphics::drawText("You've woken up in a wizard's dungeon with",
@@ -649,20 +649,18 @@ void Screen::drawPuzzle1() {
     bool won = checkWin1();
     std::string msg;
     if (won) {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (!puzzle1_done) {
             incrementGems();
             puzzle1_done = true;
             gl::AudioEngine::playSound("yay", 0.3f);
         }
         gl::Graphics::drawText("You won a gem!",
-                               glm::vec2(size.x / 2, size.y / 2), 100.0f,
+                               glm::vec2(size.x / 2, (size.y / 2) - 440.0f), 80.0f,
                                glm::vec3(0.0f, 1.0f, 0.0f),
                                gl::TextAlign::CENTER, "magic");
         gl::Graphics::drawText("ESC = Exit Puzzle",
-                               glm::vec2(size.x / 2, (size.y / 2) + 120.0f), 70.0f,
-                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
+                               glm::vec2(size.x / 2, size.y - 50.0f), 70.0f,
+                               glm::vec3(0.729f, 0.0f, 0.0f), gl::TextAlign::CENTER);
     }
     else {
         gl::Graphics::drawText("Turn off the lights!",
@@ -729,29 +727,27 @@ void Screen::drawWordPuzzle() {
     // Progress display
     std::string msg;
     if (wordPuzzleWon) {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gl::Graphics::drawText("You won a gem!",
                                glm::vec2(size.x / 2, size.y / 2), 100.0f,
-                               glm::vec3(0.0f, 1.0f, 0.0f),
+                               glm::vec3(0.0f, 0.6f, 0.016f),
                                gl::TextAlign::CENTER, "magic");
         gl::Graphics::drawText("ESC = Exit Puzzle",
                                glm::vec2(size.x / 2, (size.y / 2) + 120.0f), 70.0f,
                                glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
     } else {
-        gl::Graphics::drawText("Unscramble letters: " + currentWord,
-                               glm::vec2(size.x / 2, (size.y / 2) - 300.0f), 80.0f,
-                               glm::vec3(0.0f, 0.0f, 1.0f),
-                               gl::TextAlign::CENTER, "magic");
         gl::Graphics::drawText("Click the above letters in the right order",
                                glm::vec2(size.x / 2, (size.y / 2) + 180.0f), 70.0f,
                                glm::vec3(0.0f, 0.0f, 1.0f),
                                gl::TextAlign::CENTER);
-        gl::Graphics::drawText("ESC = Exit Puzzle",
-                               glm::vec2(size.x / 2, size.y - 80.0f), 60.0f,
-                               glm::vec3(1.0f, 0.0f, 0.0f), gl::TextAlign::CENTER);
+        gl::Graphics::drawText("R = Restart   |   ESC = Exit Puzzle",
+                               glm::vec2(size.x / 2, size.y - 50.0f), 60.0f,
+                               glm::vec3(0.384f, 0.0f, 0.49f),
+                               gl::TextAlign::CENTER);
     }
-
+    gl::Graphics::drawText("Unscramble letters: " + currentWord,
+                           glm::vec2(size.x / 2, (size.y / 2) - 300.0f), 80.0f,
+                           glm::vec3(0.0f, 0.0f, 1.0f),
+                           gl::TextAlign::CENTER, "magic");
 }
 
 void Screen::initPotionPuzzle() {
