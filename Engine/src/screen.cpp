@@ -267,7 +267,7 @@ void Screen::mouseButtonEvent(int button, int action) {
         }
     }
 
-    if(type_ == ScreenType::MAINMENU){
+    if(type_ == ScreenType::PUZZLE2){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 
             double mx = mouse_pos.x;
@@ -719,6 +719,49 @@ void Screen::drawWordPuzzle() {
                       : glm::vec3(1.0f),
         gl::TextAlign::CENTER
         );
+}
+
+void Screen::initColorPuzzle() {
+    glm::vec2 size = Window::getSize();
+
+    const int N = 3;
+
+    float cell = 140.0f;
+    float spacing = 20.0f;
+
+    float totalW = N * cell + (N - 1) * spacing;
+    float totalH = N * cell + (N - 1) * spacing;
+
+    float startX = (size.x - totalW) / 2.0f;
+    float startY = (size.y + totalH) / 2.0f;
+
+    glm::vec3 palette[3][3] = {
+        { {1,0,0}, {0,1,0}, {0,0,1} },
+        { {1,1,0}, {0,1,1}, {1,0,1} },
+        { {1,0.5,0}, {0.5,0,1}, {1,1,1} }
+    };
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+
+            colorGrid[i][j] = palette[i][j];
+
+            colorRects[i][j] = {
+                startX + j * (cell + spacing),
+                startY - i * (cell + spacing),
+                cell,
+                cell
+            };
+        }
+    }
+
+    currentColor = glm::vec3(0.0f);
+    colorPuzzleWon = false;
+}
+
+glm::vec3 mixColors(glm::vec3 a, glm::vec3 b) {
+    glm::vec3 result = a + b;
+    return glm::clamp(result, 0.0f, 1.0f);
 }
 
 void Screen::incrementGems() {

@@ -73,6 +73,7 @@ private:
 
     void initWordPuzzle();
     void drawWordPuzzle();
+    void initColorPuzzle();
 
     void drawGivenShape(gl::DrawShape* shape, Transform t, gl::DrawMaterial mat);
 
@@ -110,5 +111,17 @@ private:
 
     char letterGrid[12];
     Rect letterRects[12];
+
+    glm::vec3 currentColor = glm::vec3(0.0f);
+    glm::vec3 targetColor  = glm::vec3(1.0f, 0.0f, 1.0f); //purple
+    bool colorPuzzleWon = false;
+
+    glm::vec3 colorGrid[3][3];
+    Rect colorRects[3][3];
+    glm::vec3 palette[3][3] = {
+        { glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,1) },
+        { glm::vec3(1,1,0), glm::vec3(0,1,1), glm::vec3(1,0,1) },
+        { glm::vec3(1,0.5,0), glm::vec3(0.5,0,1), glm::vec3(1,1,1) }
+    };
 
 };
