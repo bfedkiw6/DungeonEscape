@@ -80,11 +80,11 @@ void main() {
     // approximate view direction
     vec3 viewDir = normalize(camera_pos - FragPos);
 
-    if (has_height_tex) {
-          texCoords = ParallaxMapping(texCoords, viewDir);
-    }
+    //if (has_height_tex) {
+    //      texCoords = ParallaxMapping(texCoords, viewDir);
+    //}
 
-    texCoords = clamp(texCoords, 0.001, 0.999);
+    //texCoords = clamp(texCoords, 0.001, 0.999);
 
     if (has_diffuse_tex) {
           vec3 diffuseTex = texture(diffuse_tex, texCoords).rgb;
