@@ -148,6 +148,14 @@ namespace gl {
         active_shader_->setVec3("specular", material.specular);
         active_shader_->setFloat("shininess", material.shininess);
         active_shader_->setFloat("opacity", material.opacity);
+
+        // if (material.has_height_tex) {
+        //     active_shader_->setInt("has_height_tex", true);
+        //     active_shader_->setFloat("height_scale", material.height_scale);
+        // } else {
+        //     active_shader_->setInt("has_height_tex", false);
+        // }
+
         bindMaterialTextures(material.textures);
     }
 
@@ -212,6 +220,7 @@ namespace gl {
     void Graphics::bindMaterialTextures(const GLTextures& textures) {
         bindTexture(textures.diffuse, TEXTURE_UNIT_DIFFUSE, "diffuse_tex");
         bindTexture(textures.specular, TEXTURE_UNIT_SPECULAR, "specular_tex");
+        //bindTexture(textures.height, TEXTURE_UNIT_HEIGHT, "height_tex");
     }
 
     void Graphics::bindTexture(const GLuint texture, const int unit, const char* uniform_name) {
@@ -267,6 +276,41 @@ namespace gl {
             instance_count
             );
         glBindVertexArray(0);
+    }
+
+    void Graphics::initSSAO() {
+        const auto size = Window::getSize();
+        int width = size.x;
+        int height = size.y;
+
+        glGenFramebuffers(1, &gBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+        // Normal texture
+        glGenTextures(1, &gNormal);
+        glBindTexture(GL_TEXTURE_2D, gNormal);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gNormal, 0);
+
+        // Depth texture
+        glGenTextures(1, &gDepth);
+        glBindTexture(GL_TEXTURE_2D, gDepth);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gDepth, 0);
+
+        GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, attachments);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void Graphics::beginGeometryPass() {
+        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void Graphics::endGeometryPass() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
 }

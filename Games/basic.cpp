@@ -132,6 +132,12 @@ void BasicGame::createMap() {
     trans->pos = glm::vec3(0.0f, -18.0f, 8.0f);
     trans->scale = glm::vec3(0.01f);
 
+    auto* draw = map_obj->getDrawableComp();
+    // draw->mat.textures.height = gl::Material::loadTexture("resources/textures/displ.png");
+    // draw->mat.has_height_tex = true;
+    // draw->mat.height_scale = 0.05f;
+
+
     draw_system.addGameObject(map_obj);
 }
 

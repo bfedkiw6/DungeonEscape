@@ -32,6 +32,9 @@ namespace gl {
         static void drawText(const std::string& text, glm::vec2 pos, float font_size, const glm::vec3& color, TextAlign align = TextAlign::LEFT, const std::string& font_name = "default");
 
         static void drawObjectInstanced(DrawShape* shape, const std::vector<glm::mat4>& models, const DrawMaterial& material);
+        void initSSAO();
+        void beginGeometryPass();
+        void endGeometryPass();
 
     private:
         static void initializeShaders();
@@ -45,6 +48,16 @@ namespace gl {
         static ShaderProgram skinned_;
         static ShaderProgram text_;
         static ShaderProgram phong_instanced_;
+
+        GLuint gBuffer = 0;
+        GLuint gNormal = 0;
+        GLuint gDepth = 0;
+
+        GLuint ssaoFBO = 0;
+        GLuint ssaoBlurFBO = 0;
+
+        GLuint ssaoTex = 0;
+        GLuint ssaoBlurTex = 0;
     };
 }
 

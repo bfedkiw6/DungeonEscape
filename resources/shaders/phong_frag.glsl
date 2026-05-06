@@ -27,6 +27,11 @@ uniform bool has_specular_tex;
 uniform float shininess;
 uniform float opacity;
 
+// Heightmapping
+uniform sampler2D height_tex;
+uniform bool has_height_tex;
+uniform float height_scale;
+
 
 // Light types - matching src/Light.h
 const int LIGHT_TYPE_DIRECTIONAL = 1;
@@ -48,6 +53,11 @@ uniform int num_lights;
 uniform vec3 ambient_light;
 
 
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float height = texture(height_tex, texCoords).r;
+    return texCoords - viewDir.xy * (height * height_scale);
+}
 
 
 void main() {
@@ -60,10 +70,26 @@ void main() {
     vec3 materialSpecular = specular;
 
     // only sample textures if they're bound
+    // if (has_diffuse_tex) {
+    //    vec3 diffuseTex = texture(diffuse_tex, TexCoord).rgb;
+    //    materialAmbient = diffuseTex * ambient;
+    //    materialDiffuse = diffuse * diffuseTex;
+    //}
+    vec2 texCoords = TexCoord;
+
+    // approximate view direction
+    vec3 viewDir = normalize(camera_pos - FragPos);
+
+    if (has_height_tex) {
+          texCoords = ParallaxMapping(texCoords, viewDir);
+    }
+
+    texCoords = clamp(texCoords, 0.001, 0.999);
+
     if (has_diffuse_tex) {
-        vec3 diffuseTex = texture(diffuse_tex, TexCoord).rgb;
-        materialAmbient = diffuseTex * ambient;
-        materialDiffuse = diffuse * diffuseTex;
+          vec3 diffuseTex = texture(diffuse_tex, texCoords).rgb;
+          materialAmbient = diffuseTex * ambient;
+          materialDiffuse = diffuse * diffuseTex;
     }
 
     if (has_specular_tex) {
