@@ -38,19 +38,10 @@ void CameraSystem::updateWorld(GameWorld& world, float /*dt*/) {
         return;
     }
 
-    glm::vec3 camPos = m_cam->getPosition();
-    std::cout << "cam pos: "
-              << camPos.x << ", "
-              << camPos.y << ", "
-              << camPos.z << std::endl;
-
-
     m_player_height = 0.5f;
-    std::cout << "m_objects size = " << m_objects.size() << std::endl;
     GameObject* player = m_objects[0];
     TransformComponent* transform = player->getTransformComp();
     if (!transform) {
-        std::cout << "couldn't get transform"<< std::endl;
         return;
     }
 
@@ -66,5 +57,4 @@ void CameraSystem::updateWorld(GameWorld& world, float /*dt*/) {
     glm::vec3 cam_pos = head_height;
     m_cam->setPosition(cam_pos);
     m_cam->setLook(glm::normalize(new_look));
-    std::cout << "exiting camera update" << std::endl;
 }
